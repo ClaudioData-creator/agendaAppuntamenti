@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="it" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CraftCRM SaaS Edition - Multi-Dispositivo & Sincronizzazione Cloud</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d'
+                        },
+                        accent: {
+                            500: '#6366f1',
+                            600: '#4f46e5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.7); }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- KILL-SWITCH OVERLAY -->
+    <div id="killSwitchOverlay" class="hidden fixed inset-0 z-50 bg-red-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center text-white">
+        <div class="bg-red-900/80 border-2 border-red-500 rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+            <div class="w-20 h-20 bg-red-600/30 border-2 border-red-400 rounded-full flex items-center justify-center mx-auto mb-6 text-red-300 text-4xl animate-pulse">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-3 tracking-tight">Abbonamento Disattivato</h2>
+            <p class="text-red-100 text-sm mb-6 leading-relaxed">
+                La licenza d'uso per il salone <strong id="killSwitchSalonName" class="underline">Salone Demo</strong> risulta scaduta o sospesa dal gestore SaaS.
+            </p>
+            <div class="bg-red-950/60 p-4 rounded-xl border border-red-800 text-left text-xs mb-6 space-y-1 text-red-200">
+                <p><strong>ID Cliente SaaS:</strong> <span id="killSwitchClientId">SALONE-DEMO-2026</span></p>
+                <p><strong>Stato Licenza:</strong> INATTIVA / SCADUTA</p>
+                <p><strong>Sincronizzazione Multi-Dispositivo:</strong> SOSPESA</p>
+            </div>
+            <a id="killSwitchWA" href="https://wa.me/393000000000?text=Buongiorno%20vorrei%20rinnovare%20la%20licenza%20CraftCRM" target="_blank" 
+               class="w-full inline-flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-3.5 rounded-xl transition shadow-lg text-base">
+                <i class="fa-brands fa-whatsapp text-xl"></i> Contatta Assistenza per Rinnovo
+            </a>
+            <button onclick="checkSubscriptionStatus(true)" class="mt-4 text-xs text-red-300 underline hover:text-white">Ricontrolla Stato Licenza</button>
+        </div>
+    </div>
+
+    <!-- LOGIN OVERLAY (EMAIL + PASSWORD) -->
+    <div id="authLoginOverlay" class="fixed inset-0 z-50 bg-gray-900/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl max-w-md w-full p-7 shadow-2xl space-y-5">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white text-xl shadow-md">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Accesso CraftCRM</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Inserisci le credenziali assegnate al tuo salone</p>
+                </div>
+            </div>
+
+            <form id="authLoginForm" onsubmit="handleEmailLogin(event)" class="space-y-4 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Email Operatore / Salone *</label>
+                    <input type="email" id="loginEmailInput" required autocomplete="username" placeholder="salone@esempio.it"
+                           class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 text-gray-900 dark:text-white">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Password *</label>
+                    <input type="password" id="loginPasswordInput" required autocomplete="current-password" placeholder="••••••••"
+                           class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 text-gray-900 dark:text-white">
+                </div>
+
+                <p id="loginErrorMsg" class="hidden text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 p-2.5 rounded-xl"></p>
+
+                <button type="submit" id="loginSubmitBtn"
+                        class="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition shadow-md">
+                    <i class="fa-solid fa-right-to-bracket"></i> Accedi al Gestionale
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Logo & License -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                        <i class="fa-solid fa-scissors"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-lg text-gray-900 dark:text-white tracking-tight">CraftCRM</span>
+                            <span class="bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">SaaS Multi-User</span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 flex items
