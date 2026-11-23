@@ -1,1 +1,1786 @@
 
+<!DOCTYPE html>
+<html lang="it" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CraftCRM SaaS Edition - Multi-Dispositivo & Sincronizzazione Cloud</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d'
+                        },
+                        accent: {
+                            500: '#6366f1',
+                            600: '#4f46e5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(156, 163, 175, 0.7); }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200">
+
+    <!-- KILL-SWITCH OVERLAY -->
+    <div id="killSwitchOverlay" class="hidden fixed inset-0 z-50 bg-red-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center text-white">
+        <div class="bg-red-900/80 border-2 border-red-500 rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+            <div class="w-20 h-20 bg-red-600/30 border-2 border-red-400 rounded-full flex items-center justify-center mx-auto mb-6 text-red-300 text-4xl animate-pulse">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-3xl font-bold mb-3 tracking-tight">Abbonamento Disattivato</h2>
+            <p class="text-red-100 text-sm mb-6 leading-relaxed">
+                La licenza d'uso per il salone <strong id="killSwitchSalonName" class="underline">Salone Demo</strong> risulta scaduta o sospesa dal gestore SaaS.
+            </p>
+            <div class="bg-red-950/60 p-4 rounded-xl border border-red-800 text-left text-xs mb-6 space-y-1 text-red-200">
+                <p><strong>ID Cliente SaaS:</strong> <span id="killSwitchClientId">SALONE-DEMO-2026</span></p>
+                <p><strong>Stato Licenza:</strong> INATTIVA / SCADUTA</p>
+                <p><strong>Sincronizzazione Multi-Dispositivo:</strong> SOSPESA</p>
+            </div>
+            <a id="killSwitchWA" href="https://wa.me/393000000000?text=Buongiorno%20vorrei%20rinnovare%20la%20licenza%20CraftCRM" target="_blank" 
+               class="w-full inline-flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-3.5 rounded-xl transition shadow-lg text-base">
+                <i class="fa-brands fa-whatsapp text-xl"></i> Contatta Assistenza per Rinnovo
+            </a>
+            <button onclick="checkSubscriptionStatus(true)" class="mt-4 text-xs text-red-300 underline hover:text-white">Ricontrolla Stato Licenza</button>
+        </div>
+    </div>
+
+    <!-- LOGIN OVERLAY (EMAIL + PASSWORD) -->
+    <div id="authLoginOverlay" class="fixed inset-0 z-50 bg-gray-900/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl max-w-md w-full p-7 shadow-2xl space-y-5">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white text-xl shadow-md">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Accesso CraftCRM</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Inserisci le credenziali assegnate al tuo salone</p>
+                </div>
+            </div>
+
+            <form id="authLoginForm" onsubmit="handleEmailLogin(event)" class="space-y-4 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Email Operatore / Salone *</label>
+                    <input type="email" id="loginEmailInput" required autocomplete="username" placeholder="salone@esempio.it"
+                           class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 text-gray-900 dark:text-white">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Password *</label>
+                    <input type="password" id="loginPasswordInput" required autocomplete="current-password" placeholder="••••••••"
+                           class="w-full px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 text-gray-900 dark:text-white">
+                </div>
+
+                <p id="loginErrorMsg" class="hidden text-xs font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 p-2.5 rounded-xl"></p>
+
+                <button type="submit" id="loginSubmitBtn"
+                        class="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold py-3 rounded-xl transition shadow-md">
+                    <i class="fa-solid fa-right-to-bracket"></i> Accedi al Gestionale
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                
+                <!-- Logo & License -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                        <i class="fa-solid fa-scissors"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-lg text-gray-900 dark:text-white tracking-tight">CraftCRM</span>
+                            <span class="bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider">SaaS Multi-User</span>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                            <span id="headerSalonTitle">Il Mio Salone</span>
+                            <span class="text-gray-300 dark:text-gray-600">•</span>
+                            <span class="text-emerald-600 dark:text-emerald-400 font-medium">Licenza Attiva</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Sync Status & Dark Mode -->
+                <div class="flex items-center gap-3">
+                    <div id="syncBadge" class="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60 transition-all">
+                        <span class="relative flex h-2 w-2">
+                          <span id="syncPulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span id="syncDot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <span id="syncText">Inizializzazione...</span>
+                    </div>
+
+                    <button id="logoutBtn" onclick="handleLogout()" title="Esci dall'account"
+                            class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/50 dark:hover:text-red-400 border border-gray-200 dark:border-gray-700 transition">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline">Esci</span>
+                    </button>
+
+                    <button id="themeToggleBtn" onclick="toggleDarkMode()" class="p-2 rounded-xl text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition">
+                        <i id="themeIcon" class="fa-solid fa-moon text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200/80 dark:border-gray-700/80 px-4">
+            <div class="max-w-7xl mx-auto flex space-x-1 sm:space-x-4 overflow-x-auto custom-scrollbar py-2">
+                <button onclick="switchTab('agenda')" id="tabBtn-agenda" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap bg-brand-600 text-white shadow-sm">
+                    <i class="fa-regular fa-calendar-check"></i> Agenda
+                </button>
+                <button onclick="switchTab('clienti')" id="tabBtn-clienti" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition whitespace-nowrap">
+                    <i class="fa-solid fa-users"></i> Rubrica Clienti
+                </button>
+                <button onclick="switchTab('dormienti')" id="tabBtn-dormienti" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition whitespace-nowrap relative">
+                    <i class="fa-solid fa-user-clock"></i> Clienti Dormienti
+                    <span id="dormientiBadge" class="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                </button>
+                <button onclick="switchTab('report')" id="tabBtn-report" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition whitespace-nowrap">
+                    <i class="fa-solid fa-chart-pie"></i> Report & Analytics
+                </button>
+                <button onclick="switchTab('impostazioni')" id="tabBtn-impostazioni" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition whitespace-nowrap">
+                    <i class="fa-solid fa-sliders"></i> SaaS & Sync Cloud
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CONTAINER PRINCIPALE -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- TAB 1: AGENDA APPUNTAMENTI -->
+        <section id="tab-agenda" class="tab-content space-y-6">
+
+            <!-- MINI CALENDARIO MENSILE DINAMICO CON INDICATORE DI CARICO -->
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-3">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeCalendarMonth(-1)" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition">
+                            <i class="fa-solid fa-chevron-left text-xs"></i>
+                        </button>
+                        <h4 id="calendarMonthLabel" class="text-sm font-bold text-gray-900 dark:text-white capitalize">Mese Anno</h4>
+                        <button onclick="changeCalendarMonth(1)" class="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 transition">
+                            <i class="fa-solid fa-chevron-right text-xs"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-[11px] font-medium text-gray-500 dark:text-gray-400 flex-wrap">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Liberi / &lt; 50%</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> ~50% Occupato</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span> Poca disp.</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-red-600"></span> Pieno</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-gray-400 mb-1">
+                    <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
+                </div>
+                <div id="calendarDaysGrid" class="grid grid-cols-7 gap-1.5 text-xs">
+                    <!-- Generato dinamicamente -->
+                </div>
+            </div>
+            
+            <!-- Toolbar Agenda -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <button onclick="setAgendaDateFilter('today')" id="dateFilterBtn-today" class="date-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white shadow-xs">Oggi</button>
+                    <button onclick="setAgendaDateFilter('tomorrow')" id="dateFilterBtn-tomorrow" class="date-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200">Domani</button>
+                    <button onclick="setAgendaDateFilter('week')" id="dateFilterBtn-week" class="date-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200">Prossimi 7 GG</button>
+                    <button onclick="setAgendaDateFilter('all')" id="dateFilterBtn-all" class="date-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200">Tutti</button>
+                    <input type="date" id="agendaCustomDate" onchange="setAgendaCustomDate(this.value)" class="px-2 py-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-xs text-gray-800 dark:text-gray-200">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <select id="agendaStatusSelect" onchange="renderAgenda()" class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-medium text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-brand-500">
+                        <option value="all">Tutti gli stati</option>
+                        <option value="Confermato">Confermato</option>
+                        <option value="In Attesa">In Attesa</option>
+                        <option value="Completato">Completato</option>
+                        <option value="Annullato">Annullato</option>
+                    </select>
+
+                    <button onclick="openAppointmentModal()" class="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-medium px-4 py-2 rounded-xl text-sm transition shadow-md whitespace-nowrap">
+                        <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">Nuovo Appuntamento</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Griglia Appuntamenti -->
+            <div id="appointmentsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Rendered dynamically -->
+            </div>
+            
+            <div id="noAppointmentsState" class="hidden text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
+                <i class="fa-regular fa-calendar-xmark text-4xl text-gray-400 mb-3"></i>
+                <h3 class="text-base font-semibold text-gray-700 dark:text-gray-200">Nessun appuntamento trovato</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Nessun impegno corrisponde ai filtri selezionati.</p>
+            </div>
+        </section>
+
+        <!-- TAB 2: RUBRICA CLIENTI -->
+        <section id="tab-clienti" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <div class="relative w-full sm:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-gray-400 text-sm"></i>
+                    <input type="text" id="clientSearchInput" oninput="renderClients()" placeholder="Cerca cliente per nome, tel o email..." 
+                           class="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-brand-500 text-gray-800 dark:text-gray-200">
+                </div>
+
+                <button onclick="openClientModal()" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-medium px-4 py-2 rounded-xl text-sm transition shadow-md">
+                    <i class="fa-solid fa-user-plus"></i> Aggiungi Nuovo Cliente
+                </button>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wider">
+                                <th class="p-4">Cliente</th>
+                                <th class="p-4">Contatti</th>
+                                <th class="p-4 text-center">Visite Totali</th>
+                                <th class="p-4 text-right">Spesa Totale</th>
+                                <th class="p-4">Ultima Visita</th>
+                                <th class="p-4 text-center">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTableBody" class="divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
+                            <!-- Rendered dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: CLIENTI DORMIENTI -->
+        <section id="tab-dormienti" class="tab-content hidden space-y-6">
+            <div class="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 p-4 rounded-2xl flex items-start gap-3">
+                <div class="p-2 bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl text-lg mt-0.5">
+                    <i class="fa-solid fa-user-clock"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-amber-900 dark:text-amber-200">Algoritmo Recupero Clienti Inattivi (> 30 Giorni)</h3>
+                    <p class="text-xs text-amber-700 dark:text-amber-300/80 mt-0.5">
+                        Questo sistema analizza automaticamente l'ultima data di visita completata dei clienti. Con un solo click puoi inviare un'offerta promozionale via WhatsApp per riconvertirli.
+                    </p>
+                </div>
+            </div>
+
+            <div id="dormientiGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Rendered dynamically -->
+            </div>
+        </section>
+
+        <!-- TAB 4: REPORT & ANALYTICS -->
+        <section id="tab-report" class="tab-content hidden space-y-6">
+            <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">Panoramica Analytics</h3>
+                <select id="reportPeriodSelect" onchange="renderAnalytics()" class="px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-semibold text-gray-800 dark:text-gray-200">
+                    <option value="week">Questa Settimana</option>
+                    <option value="month" selected>Questo Mese</option>
+                    <option value="quarter">Questo Trimestre</option>
+                    <option value="year">Quest'Anno</option>
+                    <option value="all">Tutto lo storico</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Incasso Totale</p>
+                    <p id="kpiIncassi" class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">€ 0</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Appuntamenti</p>
+                    <p id="kpiVolume" class="text-xl font-bold text-gray-900 dark:text-white mt-1">0</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Tasso Completam.</p>
+                    <p id="kpiTasso" class="text-xl font-bold text-brand-600 dark:text-brand-400 mt-1">0%</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Nuovi Clienti</p>
+                    <p id="kpiNuovi" class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">0</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Riconvertiti</p>
+                    <p id="kpiRiconvertiti" class="text-xl font-bold text-amber-500 mt-1">0</p>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Scontrino Medio</p>
+                    <p id="kpiScontrino" class="text-xl font-bold text-purple-600 dark:text-purple-400 mt-1">€ 0</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Trend Incassi (€)</h4>
+                    <div class="h-64 relative">
+                        <canvas id="incomeChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Stato Appuntamenti</h4>
+                    <div class="h-64 relative">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                <h4 class="text-sm font-bold text-gray-900 dark:text-white mb-4">Trattamenti Più Richiesti</h4>
+                <div class="h-64 relative">
+                    <canvas id="servicesChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: IMPOSTAZIONI SAAS & SYNC -->
+        <section id="tab-impostazioni" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                            <i class="fa-solid fa-cloud-arrow-up text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">Stato Connessione & Account</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Dettagli di collegamento cloud e account attivo sul dispositivo.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 pt-2 text-xs">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                            <span class="text-gray-600 dark:text-gray-400">Stato Connessione:</span>
+                            <span id="settingsSyncStatus" class="font-bold text-emerald-600 dark:text-emerald-400">Attivo & Sincronizzato</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                            <span class="text-gray-600 dark:text-gray-400">Identificativo Account:</span>
+                            <span id="settingsAppIdDisplay" class="font-mono text-gray-800 dark:text-gray-200">-</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                            <span class="text-gray-600 dark:text-gray-400">Memoria Locale Dispositivo:</span>
+                            <span class="font-bold text-emerald-600">Attiva</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                            <i class="fa-solid fa-key text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900 dark:text-white">Stato Abbonamento</h3>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Stato licenza gestito dal servizio.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 pt-2 text-xs">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                            <span class="text-gray-600 dark:text-gray-400">Salone:</span>
+                            <span id="billingSalonDisplay" class="font-semibold text-gray-900 dark:text-gray-100">-</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                            <span class="text-gray-600 dark:text-gray-400">Stato Licenza:</span>
+                            <span id="billingStatusBadge" class="font-bold text-emerald-600 dark:text-emerald-400">-</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl">
+                            <span class="text-gray-600 dark:text-gray-400">Scadenza:</span>
+                            <span id="billingExpiresDisplay" class="font-mono text-gray-800 dark:text-gray-200">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm md:col-span-2 space-y-4">
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-database text-brand-600"></i> Backup Manuale JSON & Reset
+                    </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Esporta i tuoi dati locali in un file `.json` per sicurezza ulteriore, oppure ripristinali da un salvataggio precedente.
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button onclick="exportJSONBackup()" class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium px-4 py-2.5 rounded-xl text-xs transition">
+                            <i class="fa-solid fa-file-export text-emerald-600"></i> Esporta File JSON
+                        </button>
+
+                        <label class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium px-4 py-2.5 rounded-xl text-xs transition cursor-pointer">
+                            <i class="fa-solid fa-file-import text-indigo-600"></i> Importa File JSON
+                            <input type="file" id="importJsonInput" accept=".json" onchange="importJSONBackup(event)" class="hidden">
+                        </label>
+
+                        <button onclick="confirmResetAllData()" class="ml-auto flex items-center gap-2 bg-red-50 dark:bg-red-950/60 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-100 font-medium px-4 py-2.5 rounded-xl text-xs transition">
+                            <i class="fa-solid fa-trash-can"></i> Resetta Tutti i Dati
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALE: CREA / MODIFICA APPUNTAMENTO -->
+    <div id="appointmentModal" class="hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-700 space-y-4 relative">
+            <button onclick="closeAppointmentModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="appModalTitle" class="text-lg font-bold text-gray-900 dark:text-white">Nuovo Appuntamento</h3>
+            
+            <form id="appointmentForm" onsubmit="handleAppointmentSubmit(event)" class="space-y-3 text-xs sm:text-sm">
+                <input type="hidden" id="appIdInput">
+                
+                <div class="relative">
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Cliente *</label>
+                    <input type="text" id="appClientInput" placeholder="Digita nome o seleziona..." required autocomplete="off"
+                           oninput="handleClientSearchDropdown(this.value)"
+                           class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-brand-500 text-gray-800 dark:text-gray-200">
+                    
+                    <div id="clientSuggestions" class="hidden absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Telefono Cliente</label>
+                    <input type="tel" id="appPhoneInput" placeholder="es. 3331234567" 
+                           class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Trattamento / Servizio *</label>
+                    <input type="text" id="appServiceInput" placeholder="es. Taglio, Piega e Colore" required
+                           class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Data *</label>
+                        <input type="date" id="appDateInput" required
+                               class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Ora *</label>
+                        <input type="time" id="appTimeInput" required
+                               class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Prezzo (€) *</label>
+                        <input type="number" step="0.5" id="appPriceInput" placeholder="35.00" required
+                               class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Stato</label>
+                        <select id="appStatusInput" class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                            <option value="Confermato">Confermato</option>
+                            <option value="In Attesa">In Attesa</option>
+                            <option value="Completato">Completato</option>
+                            <option value="Annullato">Annullato</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Note Aggiuntive</label>
+                    <textarea id="appNotesInput" rows="2" placeholder="Dettagli particolari..." 
+                              class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200"></textarea>
+                </div>
+
+                <div class="pt-3 flex gap-3">
+                    <button type="button" onclick="closeAppointmentModal()" class="w-1/2 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium">Annulla</button>
+                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium shadow-md">Salva Appuntamento</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE: CREA / MODIFICA CLIENTE -->
+    <div id="clientModal" class="hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-700 space-y-4 relative">
+            <button onclick="closeClientModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="clientModalTitle" class="text-lg font-bold text-gray-900 dark:text-white">Nuovo Cliente</h3>
+            
+            <form id="clientForm" onsubmit="handleClientSubmit(event)" class="space-y-3 text-xs sm:text-sm">
+                <input type="hidden" id="clientIdEdit">
+                
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Nome e Cognome *</label>
+                    <input type="text" id="clientNameInput" required placeholder="es. Maria Rossi"
+                           class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Telefono (WhatsApp) *</label>
+                    <input type="tel" id="clientPhoneInput" required placeholder="es. 3339876543"
+                           class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                    <input type="email" id="clientEmailInput" placeholder="es. maria@example.com"
+                           class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Servizio Preferito</label>
+                    <input type="text" id="clientPrefInput" placeholder="es. Piega Liscia"
+                           class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                </div>
+
+                <div class="pt-3 flex gap-3">
+                    <button type="button" onclick="closeClientModal()" class="w-1/2 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium">Annulla</button>
+                    <button type="submit" class="w-1/2 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium shadow-md">Salva Scheda</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODALE: STORICO VISITE E STATS CLIENTE -->
+    <div id="historyModal" class="hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-gray-200 dark:border-gray-700 space-y-4 relative">
+            <button onclick="closeHistoryModal()" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="historyClientName" class="text-lg font-bold text-gray-900 dark:text-white">Storico Cliente</h3>
+            
+            <div id="historyStatsHeader" class="grid grid-cols-3 gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-center text-xs">
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400 block">Visite Totali</span>
+                    <strong id="historyTotalVisits" class="text-base text-gray-900 dark:text-white">0</strong>
+                </div>
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400 block">Spesa Totale</span>
+                    <strong id="historyTotalSpend" class="text-base text-emerald-600 dark:text-emerald-400">€ 0</strong>
+                </div>
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400 block">Media per Visita</span>
+                    <strong id="historyAvgSpend" class="text-base text-brand-600 dark:text-brand-400">€ 0</strong>
+                </div>
+            </div>
+
+            <div class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-1" id="historyListContainer">
+            </div>
+        </div>
+    </div>
+
+    <!-- FIREBASE INITIALIZATION & ATOMIC MULTI-DEVICE CLOUD SYNC ENGINE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            doc,
+            getDoc,
+            onSnapshot,
+            setDoc,
+            deleteDoc
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCA3jiwatCwPMO1M2DQb0cahsk-w8W8Af8",
+            authDomain: "gestione-appuntamenti-64b54.firebaseapp.com",
+            projectId: "gestione-appuntamenti-64b54",
+            storageBucket: "gestione-appuntamenti-64b54.firebasestorage.app",
+            messagingSenderId: "232181766335",
+            appId: "1:232181766335:web:ba7eab939e7415dff00e0a",
+            measurementId: "G-VN2QQ432FX"
+        };
+
+        const appId = 'craft-crm-saas';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let unsubClients = null;
+        let unsubApps = null;
+        let currentUserUid = null;
+
+        function getUserCollections(uid) {
+            return {
+                clientsRef: collection(db, 'artifacts', appId, 'users', uid, 'clients'),
+                appsRef: collection(db, 'artifacts', appId, 'users', uid, 'appointments'),
+                billingDocRef: doc(db, 'artifacts', appId, 'users', uid, 'billing', 'status')
+            };
+        }
+
+        function stopListeners() {
+            if (typeof unsubClients === 'function') { unsubClients(); unsubClients = null; }
+            if (typeof unsubApps === 'function') { unsubApps(); unsubApps = null; }
+            currentUserUid = null;
+        }
+
+        function evaluateSubscriptionDoc(billingData, user) {
+            const overlay = document.getElementById('killSwitchOverlay');
+            const salonNameEl = document.getElementById('killSwitchSalonName');
+            const clientIdEl = document.getElementById('killSwitchClientId');
+            const headerSalonEl = document.getElementById('headerSalonTitle');
+            const billingSalonEl = document.getElementById('billingSalonDisplay');
+            const billingStatusEl = document.getElementById('billingStatusBadge');
+            const billingExpiresEl = document.getElementById('billingExpiresDisplay');
+
+            const displaySalon = (billingData && billingData.salonName) ? billingData.salonName : (user.email || 'Salone');
+            const displayCode = (billingData && billingData.clientCode) ? billingData.clientCode : user.uid;
+
+            if (salonNameEl) salonNameEl.innerText = displaySalon;
+            if (clientIdEl) clientIdEl.innerText = displayCode;
+            if (headerSalonEl && billingData && billingData.salonName) headerSalonEl.innerText = billingData.salonName;
+            if (billingSalonEl) billingSalonEl.innerText = displaySalon;
+
+            if (!billingData) {
+                if (billingStatusEl) {
+                    billingStatusEl.innerText = "Abbonamento non attivo";
+                    billingStatusEl.className = "font-bold text-red-600 dark:text-red-400";
+                }
+                if (billingExpiresEl) billingExpiresEl.innerText = "-";
+                if (overlay) overlay.classList.remove('hidden');
+                return { allowed: false, reason: "Abbonamento non configurato su Firestore" };
+            }
+
+            const isActiveFlag = billingData.active === true;
+            const todayDate = new Date();
+            const todayIso = todayDate.toISOString().split('T')[0];
+            const expStr = billingData.expiresAt ? String(billingData.expiresAt) : '';
+            const isExpired = Boolean(expStr && expStr < todayIso);
+
+            if (billingExpiresEl) billingExpiresEl.innerText = expStr || "Nessuna scadenza";
+
+            if (!isActiveFlag || isExpired) {
+                if (billingStatusEl) {
+                    billingStatusEl.innerText = isExpired ? "Abbonamento scaduto" : "Abbonamento non attivo";
+                    billingStatusEl.className = "font-bold text-red-600 dark:text-red-400";
+                }
+                if (overlay) overlay.classList.remove('hidden');
+                return {
+                    allowed: false,
+                    reason: isExpired ? ("Scaduto il " + expStr) : "Abbonamento disattivato"
+                };
+            }
+
+            let isExpiringSoon = false;
+            if (expStr) {
+                const expDate = new Date(expStr + "T23:59:59");
+                const diffDays = Math.ceil((expDate - todayDate) / (1000 * 60 * 60 * 24));
+                if (diffDays <= 7) isExpiringSoon = true;
+            }
+
+            if (billingStatusEl) {
+                if (isExpiringSoon) {
+                    billingStatusEl.innerText = "Abbonamento in scadenza";
+                    billingStatusEl.className = "font-bold text-amber-600 dark:text-amber-400";
+                } else {
+                    billingStatusEl.innerText = "Abbonamento attivo";
+                    billingStatusEl.className = "font-bold text-emerald-600 dark:text-emerald-400";
+                }
+            }
+
+            if (overlay) overlay.classList.add('hidden');
+            return { allowed: true, reason: isExpiringSoon ? "In scadenza" : "Attivo" };
+        }
+
+        window.verifyCloudSubscription = async function(userOverride = null) {
+            const user = userOverride || auth.currentUser;
+            if (!user) return false;
+
+            const { billingDocRef } = getUserCollections(user.uid);
+            try {
+                const snap = await getDoc(billingDocRef);
+                const data = snap.exists() ? snap.data() : null;
+                const res = evaluateSubscriptionDoc(data, user);
+                return res.allowed;
+            } catch (err) {
+                console.error("Errore lettura stato abbonamento:", err);
+                const overlay = document.getElementById('killSwitchOverlay');
+                if (overlay) overlay.classList.remove('hidden');
+                return false;
+            }
+        };
+
+        function startUserCloudSync(user) {
+            stopListeners();
+            currentUserUid = user.uid;
+
+            const displayId = user.email || user.uid;
+            const appIdEl = document.getElementById('settingsAppIdDisplay');
+            if (appIdEl) appIdEl.innerText = displayId;
+
+            const { clientsRef, appsRef } = getUserCollections(user.uid);
+
+            window.updateSyncBadge(true, "Cloud Sincronizzato (Live)");
+            const settingsStatus = document.getElementById('settingsSyncStatus');
+            if (settingsStatus) {
+                settingsStatus.innerText = "Attivo & Sincronizzato (" + displayId + ")";
+                settingsStatus.className = "font-bold text-emerald-600 dark:text-emerald-400";
+            }
+
+            unsubClients = onSnapshot(clientsRef, (snapshot) => {
+                const cloudClients = [];
+                snapshot.forEach(d => cloudClients.push(d.data()));
+                window.clientsData = cloudClients;
+                localStorage.setItem('craft_clients_saas_' + user.uid, JSON.stringify(cloudClients));
+                if (typeof window.renderAllViews === 'function') window.renderAllViews();
+            }, (err) => {
+                console.error("Clients sync error:", err);
+                window.updateSyncBadge(false, "Errore Cloud");
+            });
+
+            unsubApps = onSnapshot(appsRef, (snapshot) => {
+                const cloudApps = [];
+                snapshot.forEach(d => cloudApps.push(d.data()));
+                window.appointmentsData = cloudApps;
+                localStorage.setItem('craft_appointments_saas_' + user.uid, JSON.stringify(cloudApps));
+                if (typeof window.renderAllViews === 'function') window.renderAllViews();
+            }, (err) => {
+                console.error("Appointments sync error:", err);
+                window.updateSyncBadge(false, "Errore Cloud");
+            });
+        }
+
+        window.handleEmailLogin = async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmailInput').value.trim();
+            const password = document.getElementById('loginPasswordInput').value;
+            const errEl = document.getElementById('loginErrorMsg');
+            const btn = document.getElementById('loginSubmitBtn');
+
+            errEl.classList.add('hidden');
+            errEl.innerText = '';
+            btn.disabled = true;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (err) {
+                console.error("Login error:", err);
+                let msg = "Credenziali non valide o accesso negato.";
+                if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+                    msg = "Email o password errati.";
+                } else if (err.code === 'auth/too-many-requests') {
+                    msg = "Troppi tentativi falliti. Riprova tra qualche minuto.";
+                } else if (err.code === 'auth/network-request-failed') {
+                    msg = "Errore di rete durante l'accesso.";
+                }
+                errEl.innerText = msg;
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+            }
+        };
+
+        window.handleLogout = async function() {
+            try {
+                await signOut(auth);
+            } catch (err) {
+                console.error("Logout error:", err);
+            }
+        };
+
+        window.syncSaveClientDoc = async (client) => {
+            if (!currentUserUid) return;
+            try {
+                const ref = doc(db, 'artifacts', appId, 'users', currentUserUid, 'clients', client.id);
+                await setDoc(ref, client);
+            } catch (e) { console.error("Error saving client:", e); }
+        };
+
+        window.syncDeleteClientDoc = async (clientId) => {
+            if (!currentUserUid) return;
+            try {
+                const ref = doc(db, 'artifacts', appId, 'users', currentUserUid, 'clients', clientId);
+                await deleteDoc(ref);
+            } catch (e) { console.error("Error deleting client:", e); }
+        };
+
+        window.syncSaveAppointmentDoc = async (appointment) => {
+            if (!currentUserUid) return;
+            try {
+                const ref = doc(db, 'artifacts', appId, 'users', currentUserUid, 'appointments', appointment.id);
+                await setDoc(ref, appointment);
+            } catch (e) { console.error("Error saving appointment:", e); }
+        };
+
+        window.syncDeleteAppointmentDoc = async (appIdToDelete) => {
+            if (!currentUserUid) return;
+            try {
+                const ref = doc(db, 'artifacts', appId, 'users', currentUserUid, 'appointments', appIdToDelete);
+                await deleteDoc(ref);
+            } catch (e) { console.error("Error deleting appointment:", e); }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            const loginOverlay = document.getElementById('authLoginOverlay');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const killSwitchOverlay = document.getElementById('killSwitchOverlay');
+
+            if (user) {
+                if (loginOverlay) loginOverlay.classList.add('hidden');
+                if (logoutBtn) {
+                    logoutBtn.classList.remove('hidden');
+                    logoutBtn.classList.add('flex');
+                }
+                if (typeof window.loadUserLocalCache === 'function') {
+                    window.loadUserLocalCache(user.uid);
+                }
+
+                const isSubActive = await window.verifyCloudSubscription(user);
+                if (isSubActive) {
+                    startUserCloudSync(user);
+                } else {
+                    stopListeners();
+                    window.updateSyncBadge(false, "Abbonamento Non Attivo");
+                    const settingsStatus = document.getElementById('settingsSyncStatus');
+                    if (settingsStatus) {
+                        settingsStatus.innerText = "Bloccato: abbonamento inattivo o scaduto";
+                        settingsStatus.className = "font-bold text-red-600 dark:text-red-400";
+                    }
+                }
+            } else {
+                stopListeners();
+                if (killSwitchOverlay) killSwitchOverlay.classList.add('hidden');
+                window.clientsData = [];
+                window.appointmentsData = [];
+                if (typeof window.renderAllViews === 'function') window.renderAllViews();
+                if (logoutBtn) {
+                    logoutBtn.classList.add('hidden');
+                    logoutBtn.classList.remove('flex');
+                }
+                if (loginOverlay) loginOverlay.classList.remove('hidden');
+                window.updateSyncBadge(false, "Non Autenticato");
+                const settingsStatus = document.getElementById('settingsSyncStatus');
+                if (settingsStatus) {
+                    settingsStatus.innerText = "In attesa di accesso con credenziali";
+                    settingsStatus.className = "font-bold text-amber-600 dark:text-amber-400";
+                }
+            }
+        });
+    </script>
+
+    <!-- JAVASCRIPT LOGIC & UI MANAGEMENT -->
+    <script>
+        window.clientsData = [];
+        window.appointmentsData = [];
+        let agendaFilterDate = 'today';
+        let currentTheme = localStorage.getItem('craft_theme') || 'light';
+        let currentCalDate = new Date();
+
+        function initializeDefaultData() {
+            window.clientsData = [];
+            window.appointmentsData = [];
+            saveToLocalStorage();
+        }
+
+        let activeStorageKeySuffix = 'guest';
+
+        function loadFromLocalStorage(uidSuffix = activeStorageKeySuffix) {
+            activeStorageKeySuffix = uidSuffix || 'guest';
+            const savedClients = localStorage.getItem('craft_clients_saas_' + activeStorageKeySuffix);
+            const savedApps = localStorage.getItem('craft_appointments_saas_' + activeStorageKeySuffix);
+
+            window.clientsData = savedClients ? JSON.parse(savedClients) : [];
+            window.appointmentsData = savedApps ? JSON.parse(savedApps) : [];
+        }
+
+        window.loadUserLocalCache = function(uid) {
+            loadFromLocalStorage(uid);
+            renderAllViews();
+        };
+
+        function saveToLocalStorage() {
+            localStorage.setItem('craft_clients_saas_' + activeStorageKeySuffix, JSON.stringify(window.clientsData));
+            localStorage.setItem('craft_appointments_saas_' + activeStorageKeySuffix, JSON.stringify(window.appointmentsData));
+            if (window.notifyMultiDeviceLocalSync) {
+                window.notifyMultiDeviceLocalSync();
+            }
+        }
+
+        async function atomicSaveClient(client) {
+            const idx = window.clientsData.findIndex(c => c.id === client.id);
+            if (idx >= 0) window.clientsData[idx] = client;
+            else window.clientsData.push(client);
+            
+            saveToLocalStorage();
+
+            if (window.syncSaveClientDoc) {
+                await window.syncSaveClientDoc(client);
+            }
+            renderAllViews();
+        }
+
+        async function atomicDeleteClient(clientId) {
+            window.clientsData = window.clientsData.filter(c => c.id !== clientId);
+            window.appointmentsData = window.appointmentsData.filter(a => a.clientId !== clientId);
+            saveToLocalStorage();
+
+            if (window.syncDeleteClientDoc) {
+                await window.syncDeleteClientDoc(clientId);
+            }
+            renderAllViews();
+        }
+
+        async function atomicSaveAppointment(app) {
+            const idx = window.appointmentsData.findIndex(a => a.id === app.id);
+            if (idx >= 0) window.appointmentsData[idx] = app;
+            else window.appointmentsData.push(app);
+
+            const client = window.clientsData.find(c => c.id === app.clientId);
+            if (client && (client.dormientStatus === 'Inattivo' || client.dormientStatus === 'Richiamato')) {
+                client.dormientStatus = 'Riconvertito';
+                if (window.syncSaveClientDoc) window.syncSaveClientDoc(client);
+            }
+
+            saveToLocalStorage();
+
+            if (window.syncSaveAppointmentDoc) {
+                await window.syncSaveAppointmentDoc(app);
+            }
+            renderAllViews();
+        }
+
+        async function atomicDeleteAppointment(appId) {
+            window.appointmentsData = window.appointmentsData.filter(a => a.id !== appId);
+            saveToLocalStorage();
+
+            if (window.syncDeleteAppointmentDoc) {
+                await window.syncDeleteAppointmentDoc(appId);
+            }
+            renderAllViews();
+        }
+
+        function applyTheme(theme) {
+            currentTheme = theme;
+            localStorage.setItem('craft_theme', theme);
+            const html = document.documentElement;
+            const icon = document.getElementById('themeIcon');
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                html.classList.remove('light');
+                if (icon) icon.className = 'fa-solid fa-sun text-amber-400 text-lg';
+            } else {
+                html.classList.add('light');
+                html.classList.remove('dark');
+                if (icon) icon.className = 'fa-solid fa-moon text-lg';
+            }
+            if (typeof renderAnalytics === 'function') renderAnalytics();
+        }
+
+        function toggleDarkMode() {
+            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition whitespace-nowrap';
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = 'tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-brand-600 text-white shadow-sm transition whitespace-nowrap';
+            }
+
+            if (tabId === 'report') renderAnalytics();
+        }
+
+        window.updateSyncBadge = function(online, text) {
+            const badge = document.getElementById('syncBadge');
+            const textEl = document.getElementById('syncText');
+            const pulse = document.getElementById('syncPulse');
+            const dot = document.getElementById('syncDot');
+
+            if (!badge || !textEl || !pulse || !dot) return;
+
+            if (online) {
+                textEl.innerText = text || "Sincronizzato";
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60 transition-all";
+                pulse.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+                dot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500";
+            } else {
+                textEl.innerText = text || "Offline";
+                badge.className = "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800/60 transition-all";
+                pulse.className = "hidden";
+                dot.className = "relative inline-flex rounded-full h-2 w-2 bg-amber-500";
+            }
+        };
+
+        function renderInteractiveCalendar() {
+            const grid = document.getElementById('calendarDaysGrid');
+            const label = document.getElementById('calendarMonthLabel');
+            if (!grid || !label) return;
+
+            const year = currentCalDate.getFullYear();
+            const month = currentCalDate.getMonth();
+
+            const monthName = currentCalDate.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+            label.innerText = monthName;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+
+            let startDayIndex = firstDay.getDay() - 1;
+            if (startDayIndex === -1) startDayIndex = 6; 
+
+            grid.innerHTML = '';
+
+            for (let i = 0; i < startDayIndex; i++) {
+                grid.innerHTML += `<div class="p-2"></div>`;
+            }
+
+            const MAX_DAILY_APPTS = 8; 
+            const todayIso = new Date().toISOString().split('T')[0];
+
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                const dayApps = (window.appointmentsData || []).filter(a => a.date === dateStr && a.status !== 'Annullato');
+                const count = dayApps.length;
+
+                let colorClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-200';
+
+                if (count >= MAX_DAILY_APPTS) {
+                    colorClass = 'bg-red-600 text-white font-bold border-red-700 shadow-xs hover:bg-red-700';
+                } else if (count >= Math.ceil(MAX_DAILY_APPTS * 0.75)) {
+                    colorClass = 'bg-orange-500 text-white font-bold border-orange-600 hover:bg-orange-600';
+                } else if (count >= Math.ceil(MAX_DAILY_APPTS * 0.5)) {
+                    colorClass = 'bg-amber-100 text-amber-900 font-semibold border-amber-300 dark:bg-amber-950/80 dark:text-amber-200 hover:bg-amber-200';
+                }
+
+                const isToday = (dateStr === todayIso);
+                const isSelected = (agendaFilterDate === dateStr);
+                const ringStyle = isSelected ? 'ring-2 ring-brand-600 ring-offset-1' : (isToday ? 'ring-2 ring-gray-400' : '');
+
+                grid.innerHTML += `
+                    <button onclick="setAgendaCustomDate('${dateStr}')" 
+                            class="p-1.5 sm:p-2 rounded-xl border ${colorClass} ${ringStyle} flex flex-col items-center justify-center transition transform hover:scale-105 cursor-pointer">
+                        <span class="text-xs font-bold">${day}</span>
+                        <span class="text-[9px] opacity-85 leading-none mt-0.5">${count > 0 ? count + ' app.' : 'libero'}</span>
+                    </button>
+                `;
+            }
+        }
+
+        function changeCalendarMonth(delta) {
+            currentCalDate.setMonth(currentCalDate.getMonth() + delta);
+            renderInteractiveCalendar();
+        }
+
+        function setAgendaDateFilter(type) {
+            agendaFilterDate = type;
+            document.querySelectorAll('.date-filter-btn').forEach(btn => {
+                btn.className = 'date-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200';
+            });
+            document.getElementById(`dateFilterBtn-${type}`)?.classList.add('bg-brand-600', 'text-white');
+            document.getElementById('agendaCustomDate').value = '';
+            renderAgenda();
+            renderInteractiveCalendar();
+        }
+
+        function setAgendaCustomDate(val) {
+            if (!val) return;
+            agendaFilterDate = val;
+            document.querySelectorAll('.date-filter-btn').forEach(btn => {
+                btn.className = 'date-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200';
+            });
+            document.getElementById('agendaCustomDate').value = val;
+            renderAgenda();
+            renderInteractiveCalendar();
+        }
+
+        function renderAgenda() {
+            const listContainer = document.getElementById('appointmentsList');
+            const noState = document.getElementById('noAppointmentsState');
+            const statusFilter = document.getElementById('agendaStatusSelect').value;
+
+            const today = new Date().toISOString().split('T')[0];
+            const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+            const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+
+            let filtered = (window.appointmentsData || []).filter(app => {
+                if (statusFilter !== 'all' && app.status !== statusFilter) return false;
+
+                if (agendaFilterDate === 'today') return app.date === today;
+                if (agendaFilterDate === 'tomorrow') return app.date === tomorrow;
+                if (agendaFilterDate === 'week') return app.date >= today && app.date <= nextWeek;
+                if (agendaFilterDate === 'all') return true;
+                return app.date === agendaFilterDate;
+            });
+
+            filtered.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '';
+                noState.classList.remove('hidden');
+                return;
+            }
+
+            noState.classList.add('hidden');
+            listContainer.innerHTML = filtered.map(app => {
+                let badgeStyle = 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300';
+                if (app.status === 'Completato') badgeStyle = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300';
+                if (app.status === 'In Attesa') badgeStyle = 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300';
+                if (app.status === 'Annullato') badgeStyle = 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300';
+
+                const formattedPrice = parseFloat(app.price || 0).toFixed(2);
+                
+                return `
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col justify-between space-y-4 hover:border-brand-500 transition">
+                        <div>
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 dark:text-white text-base">${app.clientName}</h4>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 font-mono"><i class="fa-solid fa-phone text-[10px] mr-1"></i>${app.phone || 'N/A'}</p>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-[11px] font-bold ${badgeStyle}">${app.status}</span>
+                            </div>
+
+                            <div class="bg-gray-50 dark:bg-gray-900/60 p-3 rounded-xl space-y-1.5 text-xs text-gray-700 dark:text-gray-300">
+                                <p class="font-semibold text-gray-900 dark:text-gray-100"><i class="fa-solid fa-cut text-brand-600 mr-1"></i> ${app.service}</p>
+                                <div class="flex items-center justify-between text-gray-500 dark:text-gray-400 pt-1 border-t border-gray-200/50 dark:border-gray-700/50">
+                                    <span><i class="fa-regular fa-clock mr-1"></i> ${app.date} alle ${app.time}</span>
+                                    <strong class="text-emerald-600 dark:text-emerald-400 text-sm">€ ${formattedPrice}</strong>
+                                </div>
+                                ${app.notes ? `<p class="italic text-[11px] text-gray-500 mt-1">"${app.notes}"</p>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 dark:border-gray-700/60">
+                            <button onclick="sendWhatsAppReminder('${app.phone}', '${app.clientName}', '${app.service}', '${app.date}', '${app.time}')" 
+                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900 font-semibold text-xs transition">
+                                <i class="fa-brands fa-whatsapp text-emerald-600 text-sm"></i> WhatsApp
+                            </button>
+
+                            <div class="flex items-center gap-1">
+                                <button onclick="openAppointmentModal('${app.id}')" class="p-2 text-gray-400 hover:text-brand-600 transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="confirmDeleteAppointment('${app.id}')" class="p-2 text-gray-400 hover:text-red-600 transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function sendWhatsAppReminder(phone, name, service, date, time) {
+            if (!phone) {
+                alert("Numero di telefono non presente per questo cliente.");
+                return;
+            }
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            const msg = `Ciao ${name}, ti ricordiamo il tuo appuntamento per ${service} il giorno ${date} alle ore ${time} presso il nostro Salone. Ti aspettiamo!`;
+            const url = `https://wa.me/${cleanPhone.startsWith('39') ? cleanPhone : '39' + cleanPhone}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        function renderClients() {
+            const tableBody = document.getElementById('clientsTableBody');
+            const search = document.getElementById('clientSearchInput').value.toLowerCase();
+
+            let filtered = (window.clientsData || []).filter(c => 
+                c.name.toLowerCase().includes(search) || 
+                (c.phone && c.phone.includes(search)) || 
+                (c.email && c.email.toLowerCase().includes(search))
+            );
+
+            tableBody.innerHTML = filtered.map(c => {
+                const clientApps = (window.appointmentsData || []).filter(a => a.clientId === c.id);
+                const totalVisits = clientApps.length;
+                const totalSpend = clientApps.filter(a => a.status === 'Completato').reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0);
+                
+                const completedApps = clientApps.filter(a => a.status === 'Completato').sort((a,b) => b.date.localeCompare(a.date));
+                const lastVisit = completedApps.length > 0 ? completedApps[0].date : 'Mai';
+
+                return `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition">
+                        <td class="p-4 font-semibold text-gray-900 dark:text-white">
+                            ${c.name}
+                            ${c.preferredService ? `<span class="block text-[11px] font-normal text-gray-500">${c.preferredService}</span>` : ''}
+                        </td>
+                        <td class="p-4 text-gray-600 dark:text-gray-300 font-mono text-xs">
+                            ${c.phone}<br><span class="text-gray-400 font-sans text-[11px]">${c.email || ''}</span>
+                        </td>
+                        <td class="p-4 text-center font-bold text-gray-700 dark:text-gray-200">${totalVisits}</td>
+                        <td class="p-4 text-right font-bold text-emerald-600 dark:text-emerald-400">€ ${totalSpend.toFixed(2)}</td>
+                        <td class="p-4 text-gray-500 font-mono text-xs">${lastVisit}</td>
+                        <td class="p-4 text-center">
+                            <div class="flex items-center justify-center gap-1.5">
+                                <button onclick="quickAddAppointmentForClient('${c.id}')" title="+ Appuntamento" class="p-2 bg-brand-50 text-brand-600 hover:bg-brand-100 rounded-lg transition text-xs font-semibold">
+                                    <i class="fa-solid fa-calendar-plus"></i>
+                                </button>
+                                <button onclick="openHistoryModal('${c.id}')" title="Storico" class="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition text-xs font-semibold">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </button>
+                                <button onclick="openClientModal('${c.id}')" title="Modifica" class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white transition">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button onclick="confirmDeleteClient('${c.id}')" title="Elimina" class="p-2 text-gray-400 hover:text-red-600 transition">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderDormienti() {
+            const container = document.getElementById('dormientiGrid');
+            const badge = document.getElementById('dormientiBadge');
+            const today = new Date();
+
+            let dormientiList = [];
+
+            (window.clientsData || []).forEach(client => {
+                const clientApps = (window.appointmentsData || []).filter(a => a.clientId === client.id && a.status === 'Completato');
+                if (clientApps.length === 0) return;
+
+                clientApps.sort((a, b) => b.date.localeCompare(a.date));
+                const lastDate = new Date(clientApps[0].date);
+                const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 30) {
+                    dormientiList.push({
+                        client,
+                        daysInactive: diffDays,
+                        lastVisitDate: clientApps[0].date,
+                        lastService: clientApps[0].service
+                    });
+                }
+            });
+
+            badge.innerText = dormientiList.length;
+
+            if (dormientiList.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-12 text-center bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
+                        <i class="fa-solid fa-circle-check text-4xl text-emerald-500 mb-2"></i>
+                        <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200">Nessun Cliente Dormiente</h4>
+                        <p class="text-xs text-gray-500 mt-1">Tutti i clienti registrati hanno effettuato visite negli ultimi 30 giorni.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = dormientiList.map(item => {
+                const c = item.client;
+                let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Inattivo da ${item.daysInactive} gg</span>`;
+                if (c.dormientStatus === 'Richiamato') statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">Offerta Inviata (Richiamato)</span>`;
+                if (c.dormientStatus === 'Riconvertito') statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Riconvertito!</span>`;
+
+                return `
+                    <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-3 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-start justify-between">
+                                <h4 class="font-bold text-gray-900 dark:text-white text-sm">${c.name}</h4>
+                                ${statusBadge}
+                            </div>
+                            <p class="text-xs text-gray-500 font-mono mt-0.5">${c.phone}</p>
+                            
+                            <div class="mt-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-xl text-xs space-y-1">
+                                <p class="text-gray-600 dark:text-gray-300"><strong>Ultima Visita:</strong> ${item.lastVisitDate}</p>
+                                <p class="text-gray-600 dark:text-gray-300"><strong>Ultimo Servizio:</strong> ${item.lastService}</p>
+                            </div>
+                        </div>
+
+                        <button onclick="sendDormientWinbackOffer('${c.id}', '${c.phone}', '${c.name}')" 
+                                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold py-2.5 rounded-xl text-xs shadow-md hover:from-emerald-600 hover:to-teal-700 transition">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> Invia Offerta Rientro (-20%)
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function sendDormientWinbackOffer(clientId, phone, name) {
+            const client = window.clientsData.find(c => c.id === clientId);
+            if (client) {
+                client.dormientStatus = 'Richiamato';
+                await atomicSaveClient(client);
+            }
+
+            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            const msg = `Ciao ${name}! Ci manchi al salone. Per il tuo prossimo appuntamento abbiamo riservato uno sconto speciale del 20%! Prenota ora direttamente da questo messaggio. A presto!`;
+            const url = `https://wa.me/${cleanPhone.startsWith('39') ? cleanPhone : '39' + cleanPhone}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        }
+
+        let chartInstanceIncome = null;
+        let chartInstanceStatus = null;
+        let chartInstanceServices = null;
+
+        function getFilteredAppointmentsByPeriod(period) {
+            const now = new Date();
+            return (window.appointmentsData || []).filter(app => {
+                if (!app.date) return false;
+                const appDate = new Date(app.date + "T00:00:00");
+                if (isNaN(appDate.getTime())) return false;
+
+                if (period === 'week') {
+                    const startOfWeek = new Date(now);
+                    const day = now.getDay();
+                    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+                    startOfWeek.setDate(diff);
+                    startOfWeek.setHours(0, 0, 0, 0);
+                    return appDate >= startOfWeek;
+                }
+                if (period === 'month') {
+                    return appDate.getFullYear() === now.getFullYear() && appDate.getMonth() === now.getMonth();
+                }
+                if (period === 'quarter') {
+                    const currentQuarter = Math.floor(now.getMonth() / 3);
+                    const appQuarter = Math.floor(appDate.getMonth() / 3);
+                    return appDate.getFullYear() === now.getFullYear() && currentQuarter === appQuarter;
+                }
+                if (period === 'year') {
+                    return appDate.getFullYear() === now.getFullYear();
+                }
+                return true;
+            });
+        }
+
+        function renderAnalytics() {
+            const isDark = currentTheme === 'dark';
+            const textColor = isDark ? '#e5e7eb' : '#374151';
+            const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+
+            const selectedPeriod = document.getElementById('reportPeriodSelect')?.value || 'month';
+            const periodApps = getFilteredAppointmentsByPeriod(selectedPeriod);
+
+            const completedApps = periodApps.filter(a => a.status === 'Completato');
+            const totalIncassi = completedApps.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0);
+            const totalVolume = periodApps.length;
+            const completionRate = totalVolume > 0 ? ((completedApps.length / totalVolume) * 100).toFixed(0) : 0;
+            const nuoviClienti = (window.clientsData || []).length;
+            const reconvertedCount = (window.clientsData || []).filter(c => c.dormientStatus === 'Riconvertito').length;
+            const avgTicket = completedApps.length > 0 ? (totalIncassi / completedApps.length).toFixed(2) : '0.00';
+
+            document.getElementById('kpiIncassi').innerText = `€ ${totalIncassi.toFixed(2)}`;
+            document.getElementById('kpiVolume').innerText = totalVolume;
+            document.getElementById('kpiTasso').innerText = `${completionRate}%`;
+            document.getElementById('kpiNuovi').innerText = nuoviClienti;
+            document.getElementById('kpiRiconvertiti').innerText = reconvertedCount;
+            document.getElementById('kpiScontrino').innerText = `€ ${avgTicket}`;
+
+            const ctxIncome = document.getElementById('incomeChart').getContext('2d');
+            if (chartInstanceIncome) chartInstanceIncome.destroy();
+
+            const validApps = periodApps.filter(a => a.status !== 'Annullato');
+            const dailyTotals = {};
+            validApps.forEach(app => {
+                if (app.date) {
+                    const price = parseFloat(app.price || 0) || 0;
+                    dailyTotals[app.date] = (dailyTotals[app.date] || 0) + price;
+                }
+            });
+
+            const sortedDates = Object.keys(dailyTotals).sort();
+            const incomeValues = sortedDates.map(d => Number(dailyTotals[d].toFixed(2)));
+
+            chartInstanceIncome = new Chart(ctxIncome, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{
+                        label: 'Incassi (€)',
+                        data: incomeValues,
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22, 163, 74, 0.15)',
+                        fill: true,
+                        tension: 0.35
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            if (chartInstanceStatus) chartInstanceStatus.destroy();
+
+            const statusCounts = {
+                Confermato: periodApps.filter(a => a.status === 'Confermato').length,
+                InAttesa: periodApps.filter(a => a.status === 'In Attesa').length,
+                Completato: periodApps.filter(a => a.status === 'Completato').length,
+                Annullato: periodApps.filter(a => a.status === 'Annullato').length
+            };
+
+            chartInstanceStatus = new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Confermato', 'In Attesa', 'Completato', 'Annullato'],
+                    datasets: [{
+                        data: [statusCounts.Confermato, statusCounts.InAttesa, statusCounts.Completato, statusCounts.Annullato],
+                        backgroundColor: ['#3b82f6', '#f59e0b', '#22c55e', '#ef4444']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: textColor } } }
+                }
+            });
+
+            const ctxServices = document.getElementById('servicesChart').getContext('2d');
+            if (chartInstanceServices) chartInstanceServices.destroy();
+
+            const serviceCounts = {};
+            periodApps.forEach(app => {
+                if (app.service && app.service.trim() !== '') {
+                    const name = app.service.trim();
+                    serviceCounts[name] = (serviceCounts[name] || 0) + 1;
+                }
+            });
+
+            const sortedServices = Object.keys(serviceCounts)
+                .map(name => ({ name, count: serviceCounts[name] }))
+                .sort((a, b) => b.count - a.count);
+
+            const serviceLabels = sortedServices.map(s => s.name);
+            const serviceData = sortedServices.map(s => s.count);
+
+            chartInstanceServices = new Chart(ctxServices, {
+                type: 'bar',
+                data: {
+                    labels: serviceLabels,
+                    datasets: [{
+                        label: 'Presenze',
+                        data: serviceData,
+                        backgroundColor: '#6366f1',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: textColor }, grid: { color: gridColor } },
+                        y: { beginAtZero: true, ticks: { precision: 0, color: textColor }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        }
+
+        function openAppointmentModal(appId = null) {
+            const modal = document.getElementById('appointmentModal');
+            const form = document.getElementById('appointmentForm');
+            const title = document.getElementById('appModalTitle');
+            form.reset();
+
+            if (appId) {
+                title.innerText = "Modifica Appuntamento";
+                const app = window.appointmentsData.find(a => a.id === appId);
+                if (app) {
+                    document.getElementById('appIdInput').value = app.id;
+                    document.getElementById('appClientInput').value = app.clientName;
+                    document.getElementById('appPhoneInput').value = app.phone || '';
+                    document.getElementById('appServiceInput').value = app.service;
+                    document.getElementById('appDateInput').value = app.date;
+                    document.getElementById('appTimeInput').value = app.time;
+                    document.getElementById('appPriceInput').value = app.price;
+                    document.getElementById('appStatusInput').value = app.status;
+                    document.getElementById('appNotesInput').value = app.notes || '';
+                }
+            } else {
+                title.innerText = "Nuovo Appuntamento";
+                document.getElementById('appIdInput').value = '';
+                document.getElementById('appDateInput').value = new Date().toISOString().split('T')[0];
+                document.getElementById('appTimeInput').value = '10:00';
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeAppointmentModal() {
+            document.getElementById('appointmentModal').classList.add('hidden');
+        }
+
+        function handleClientSearchDropdown(val) {
+            const sug = document.getElementById('clientSuggestions');
+            if (!val || val.length < 1) {
+                sug.classList.add('hidden');
+                return;
+            }
+
+            const matches = window.clientsData.filter(c => c.name.toLowerCase().includes(val.toLowerCase()));
+            if (matches.length === 0) {
+                sug.classList.add('hidden');
+                return;
+            }
+
+            sug.innerHTML = matches.map(m => `
+                <div onclick="selectClientForAppointment('${m.id}', '${m.name}', '${m.phone}')" 
+                     class="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-xs flex justify-between items-center">
+                    <span class="font-bold text-gray-800 dark:text-gray-200">${m.name}</span>
+                    <span class="text-gray-400 font-mono">${m.phone}</span>
+                </div>
+            `).join('');
+            sug.classList.remove('hidden');
+        }
+
+        function selectClientForAppointment(id, name, phone) {
+            document.getElementById('appClientInput').value = name;
+            document.getElementById('appPhoneInput').value = phone;
+            document.getElementById('clientSuggestions').classList.add('hidden');
+        }
+
+        async function handleAppointmentSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('appIdInput').value || 'app_' + Date.now();
+            const clientName = document.getElementById('appClientInput').value.trim();
+            const phone = document.getElementById('appPhoneInput').value.trim();
+            
+            let client = window.clientsData.find(c => c.name.toLowerCase() === clientName.toLowerCase());
+            if (!client) {
+                client = {
+                    id: 'c_' + Date.now(),
+                    name: clientName,
+                    phone: phone,
+                    email: '',
+                    preferredService: document.getElementById('appServiceInput').value,
+                    dormientStatus: 'Attivo'
+                };
+                await atomicSaveClient(client);
+            }
+
+            const appObj = {
+                id: id,
+                clientId: client.id,
+                clientName: clientName,
+                phone: phone,
+                service: document.getElementById('appServiceInput').value,
+                date: document.getElementById('appDateInput').value,
+                time: document.getElementById('appTimeInput').value,
+                price: parseFloat(document.getElementById('appPriceInput').value) || 0,
+                status: document.getElementById('appStatusInput').value,
+                notes: document.getElementById('appNotesInput').value
+            };
+
+            await atomicSaveAppointment(appObj);
+            closeAppointmentModal();
+        }
+
+        function confirmDeleteAppointment(appId) {
+            if (window.confirm("Sei sicuro di voler eliminare questo appuntamento?")) {
+                atomicDeleteAppointment(appId);
+            }
+        }
+
+        function openClientModal(clientId = null) {
+            const modal = document.getElementById('clientModal');
+            const form = document.getElementById('clientForm');
+            const title = document.getElementById('clientModalTitle');
+            form.reset();
+
+            if (clientId) {
+                title.innerText = "Modifica Scheda Cliente";
+                const c = window.clientsData.find(x => x.id === clientId);
+                if (c) {
+                    document.getElementById('clientIdEdit').value = c.id;
+                    document.getElementById('clientNameInput').value = c.name;
+                    document.getElementById('clientPhoneInput').value = c.phone || '';
+                    document.getElementById('clientEmailInput').value = c.email || '';
+                    document.getElementById('clientPrefInput').value = c.preferredService || '';
+                }
+            } else {
+                title.innerText = "Nuovo Cliente";
+                document.getElementById('clientIdEdit').value = '';
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function closeClientModal() {
+            document.getElementById('clientModal').classList.add('hidden');
+        }
+
+        async function handleClientSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('clientIdEdit').value || 'c_' + Date.now();
+            const clientObj = {
+                id: id,
+                name: document.getElementById('clientNameInput').value.trim(),
+                phone: document.getElementById('clientPhoneInput').value.trim(),
+                email: document.getElementById('clientEmailInput').value.trim(),
+                preferredService: document.getElementById('clientPrefInput').value.trim(),
+                dormientStatus: 'Attivo'
+            };
+            await atomicSaveClient(clientObj);
+            closeClientModal();
+        }
+
+        function confirmDeleteClient(clientId) {
+            if (window.confirm("Attenzione: eliminando il cliente cancellerai anche il suo storico appuntamenti. Continuare?")) {
+                atomicDeleteClient(clientId);
+            }
+        }
+
+        function quickAddAppointmentForClient(clientId) {
+            const c = window.clientsData.find(x => x.id === clientId);
+            if (!c) return;
+            switchTab('agenda');
+            openAppointmentModal();
+            document.getElementById('appClientInput').value = c.name;
+            document.getElementById('appPhoneInput').value = c.phone;
+            document.getElementById('appServiceInput').value = c.preferredService || '';
+        }
+
+        function openHistoryModal(clientId) {
+            const c = window.clientsData.find(x => x.id === clientId);
+            if (!c) return;
+
+            document.getElementById('historyClientName').innerText = `Storico: ${c.name}`;
+            const clientApps = window.appointmentsData.filter(a => a.clientId === c.id);
+            const completedApps = clientApps.filter(a => a.status === 'Completato');
+
+            const totalSpend = completedApps.reduce((acc, curr) => acc + (parseFloat(curr.price) || 0), 0);
+            const avgSpend = completedApps.length > 0 ? (totalSpend / completedApps.length) : 0;
+
+            document.getElementById('historyTotalVisits').innerText = completedApps.length;
+            document.getElementById('historyTotalSpend').innerText = `€ ${totalSpend.toFixed(2)}`;
+            document.getElementById('historyAvgSpend').innerText = `€ ${avgSpend.toFixed(2)}`;
+
+            const container = document.getElementById('historyListContainer');
+            if (clientApps.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">Nessun appuntamento registrato per questo cliente.</p>`;
+            } else {
+                container.innerHTML = clientApps.map(a => `
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 rounded-xl flex items-center justify-between text-xs">
+                        <div>
+                            <strong class="text-gray-800 dark:text-gray-200 block">${a.service}</strong>
+                            <span class="text-gray-400">${a.date} ore ${a.time}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400 block">€ ${parseFloat(a.price).toFixed(2)}</span>
+                            <span class="text-[10px] text-gray-500">${a.status}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('historyModal').classList.remove('hidden');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.add('hidden');
+        }
+
+        async function checkSubscriptionStatus(manualCheck = false) {
+            if (typeof window.verifyCloudSubscription === 'function') {
+                const active = await window.verifyCloudSubscription();
+                if (manualCheck) {
+                    alert(active ? "Verifica completata: Licenza d'uso ATTIVA." : "Licenza non attiva o scaduta.");
+                }
+                return active;
+            }
+            return false;
+        }
+
+        function exportJSONBackup() {
+            const backupPayload = {
+                version: "CraftCRM_SaaS_2.0",
+                exportDate: new Date().toISOString(),
+                salon: document.getElementById('headerSalonTitle').innerText,
+                clients: window.clientsData,
+                appointments: window.appointmentsData
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPayload, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `CraftCRM_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importJSONBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.clients && parsed.appointments) {
+                        window.clientsData = parsed.clients;
+                        window.appointmentsData = parsed.appointments;
+                        saveToLocalStorage();
+                        renderAllViews();
+                        alert("Backup importato con successo!");
+                    } else {
+                        alert("File JSON non valido per CraftCRM.");
+                    }
+                } catch (err) {
+                    alert("Errore durante la lettura del file JSON.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function confirmResetAllData() {
+            if (window.confirm("ATTENZIONE! Vuoi cancellare definitivamente tutti i dati locali del salone? Questa azione è irreversibile.")) {
+                localStorage.removeItem('craft_clients_saas');
+                localStorage.removeItem('craft_appointments_saas');
+                initializeDefaultData();
+                renderAllViews();
+                alert("Dati resettati allo stato iniziale.");
+            }
+        }
+
+        window.renderAllViews = function() {
+            renderInteractiveCalendar();
+            renderAgenda();
+            renderClients();
+            renderDormienti();
+        };
+
+        window.onload = function() {
+            applyTheme(currentTheme);
+            loadFromLocalStorage();
+            renderAllViews();
+            checkSubscriptionStatus();
+        };
+    </script>
+</body>
+</html>
