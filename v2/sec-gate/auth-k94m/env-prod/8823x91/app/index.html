@@ -219,7 +219,7 @@
                     <!-- TOGGLE SOVRAPPOSIZIONI SU AGENDA -->
                     <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs">
                         <span class="text-gray-600 dark:text-gray-400 font-medium">Sovrapposizioni:</span>
-                        <select id="overlapModeSelect" onchange="toggleOverlapSetting(this.value)" class="bg-transparent font-bold text-brand-600 dark:text-brand-400 focus:outline-none">
+                        <select id="overlapModeSelect" onchange="toggleOverlapSetting(this.value)" class="bg-transparent font-bold text-brand-600 dark:text-brand-400 focus:outline-none cursor-pointer">
                             <option value="allow">Permesse (Multi-Poltrona)</option>
                             <option value="block">Bloccate (Monoperatore)</option>
                         </select>
@@ -489,7 +489,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Data *</label>
-                        <input type="date" id="appDateInput" required
+                        <input type="date" id="appDateInput" required onchange="updateQuickTimeButtons()"
                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
                     </div>
                     <div>
@@ -499,30 +499,14 @@
                     </div>
                 </div>
 
-                <!-- SELEZIONE ORARI RAPIDI PREIMPOSTATI -->
+                <!-- SELEZIONE ORARI RAPIDI PREIMPOSTATI (DINAMICI CON CONTROLLO DISPONIBILITÀ) -->
                 <div>
-                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1 text-xs">Orario Rapido Prefissato</label>
-                    <div class="grid grid-cols-6 gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-xl border border-gray-200 dark:border-gray-700 max-h-24 overflow-y-auto custom-scrollbar">
-                        <button type="button" onclick="setQuickTime('08:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">08:00</button>
-                        <button type="button" onclick="setQuickTime('08:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">08:30</button>
-                        <button type="button" onclick="setQuickTime('09:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">09:00</button>
-                        <button type="button" onclick="setQuickTime('09:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">09:30</button>
-                        <button type="button" onclick="setQuickTime('10:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">10:00</button>
-                        <button type="button" onclick="setQuickTime('10:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">10:30</button>
-                        <button type="button" onclick="setQuickTime('11:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">11:00</button>
-                        <button type="button" onclick="setQuickTime('11:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">11:30</button>
-                        <button type="button" onclick="setQuickTime('12:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">12:00</button>
-                        <button type="button" onclick="setQuickTime('14:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">14:30</button>
-                        <button type="button" onclick="setQuickTime('15:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">15:00</button>
-                        <button type="button" onclick="setQuickTime('15:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">15:30</button>
-                        <button type="button" onclick="setQuickTime('16:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">16:00</button>
-                        <button type="button" onclick="setQuickTime('16:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">16:30</button>
-                        <button type="button" onclick="setQuickTime('17:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">17:00</button>
-                        <button type="button" onclick="setQuickTime('17:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">17:30</button>
-                        <button type="button" onclick="setQuickTime('18:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">18:00</button>
-                        <button type="button" onclick="setQuickTime('18:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">18:30</button>
-                        <button type="button" onclick="setQuickTime('19:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">19:00</button>
-                        <button type="button" onclick="setQuickTime('19:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">19:30</button>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block font-semibold text-gray-700 dark:text-gray-300 text-xs">Orari Prefissati Disponibili</label>
+                        <span id="quickTimeNotice" class="text-[10px] text-gray-400"></span>
+                    </div>
+                    <div id="quickTimeButtonsGrid" class="grid grid-cols-5 sm:grid-cols-6 gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-xl border border-gray-200 dark:border-gray-700 max-h-28 overflow-y-auto custom-scrollbar">
+                        <!-- Generati dinamicamente da updateQuickTimeButtons() -->
                     </div>
                 </div>
 
@@ -1043,12 +1027,51 @@
         function toggleOverlapSetting(val) {
             if (!window.salonConfig) window.salonConfig = {};
             window.salonConfig.allowOverlaps = (val === 'allow');
+            updateQuickTimeButtons();
         }
 
-        function initializeDefaultData() {
-            window.clientsData = [];
-            window.appointmentsData = [];
-            saveToLocalStorage();
+        function updateQuickTimeButtons() {
+            const container = document.getElementById('quickTimeButtonsGrid');
+            if (!container) return;
+
+            const selectedDate = document.getElementById('appDateInput').value;
+            const currentAppId = document.getElementById('appIdInput').value;
+            const allowOverlaps = window.salonConfig?.allowOverlaps !== false;
+
+            const standardTimes = [
+                '08:00', '08:30', '09:00', '09:30', '10:00', '10:30', 
+                '11:00', '11:30', '12:00', '14:30', '15:00', '15:30', 
+                '16:00', '16:30', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30'
+            ];
+
+            const occupiedTimes = new Set();
+            if (!allowOverlaps && selectedDate) {
+                (window.appointmentsData || []).forEach(app => {
+                    if (app.date === selectedDate && app.status !== 'Annullato' && app.id !== currentAppId) {
+                        occupiedTimes.add(app.time);
+                    }
+                });
+            }
+
+            container.innerHTML = standardTimes.map(timeStr => {
+                const isOccupied = occupiedTimes.has(timeStr);
+
+                if (isOccupied) {
+                    return `
+                        <button type="button" disabled title="Orario già occupato"
+                                class="py-1 px-1.5 bg-gray-200 dark:bg-gray-800 text-gray-400 dark:text-gray-600 rounded-lg text-[11px] font-medium border border-gray-300 dark:border-gray-700 cursor-not-allowed line-through opacity-60">
+                            ${timeStr}
+                        </button>
+                    `;
+                } else {
+                    return `
+                        <button type="button" onclick="setQuickTime('${timeStr}')" 
+                                class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white text-gray-800 dark:text-gray-200 rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">
+                            ${timeStr}
+                        </button>
+                    `;
+                }
+            }).join('');
         }
 
         let activeStorageKeySuffix = 'guest';
@@ -1070,9 +1093,6 @@
         function saveToLocalStorage() {
             localStorage.setItem('craft_clients_saas_' + activeStorageKeySuffix, JSON.stringify(window.clientsData));
             localStorage.setItem('craft_appointments_saas_' + activeStorageKeySuffix, JSON.stringify(window.appointmentsData));
-            if (window.notifyMultiDeviceLocalSync) {
-                window.notifyMultiDeviceLocalSync();
-            }
         }
 
         async function atomicSaveClient(client) {
@@ -1694,6 +1714,8 @@
                 document.getElementById('appDateInput').value = new Date().toISOString().split('T')[0];
                 document.getElementById('appTimeInput').value = '10:00';
             }
+
+            updateQuickTimeButtons();
             modal.classList.remove('hidden');
         }
 
@@ -1738,9 +1760,6 @@
             const selectedDate = document.getElementById('appDateInput').value;
             const selectedTime = document.getElementById('appTimeInput').value;
 
-            // =========================================================
-            // CONTROLLO SOVRAPPOSIZIONE ORARIO (Se il salone ha bloccato le sovrapposizioni)
-            // =========================================================
             const allowOverlaps = window.salonConfig?.allowOverlaps !== false; 
 
             if (!allowOverlaps) {
@@ -1751,7 +1770,7 @@
                 });
 
                 if (isOverlap) {
-                    alert(`⚠️ Attenzione! L'orario delle ${selectedTime} del giorno ${selectedDate} risulta già occupato da un altro appuntamento e le sovrapposizioni sono bloccate.`);
+                    alert(`⚠️ Attenzione! L'orario delle ${selectedTime} del giorno ${selectedDate} risulta già occupato da un altro appuntamento e le sovrapposizioni sono bloccate per il tuo salone.`);
                     return;
                 }
             }
