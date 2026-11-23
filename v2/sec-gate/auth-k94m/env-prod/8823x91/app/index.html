@@ -44,16 +44,16 @@
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200">
 
-    <!-- BANNER AVVISO RINNOVO (CHIUDIBILE - ANTEPRIMA 4 GG PRE-SCADENZA O 6 GG DI GRAZIA POST-SCADENZA) -->
+    <!-- BANNER AVVISO RINNOVO (GENTILE & CHIUDIBILE: 4 GG PRE-SCADENZA O 6 GG PERIODO DI CORTESIA) -->
     <div id="subscriptionWarningBanner" class="hidden bg-amber-500 text-white px-4 py-2.5 shadow-md relative transition-all duration-300 z-40">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 text-xs sm:text-sm font-medium">
             <div class="flex items-center gap-2">
-                <i id="bannerWarningIcon" class="fa-solid fa-triangle-exclamation text-lg animate-bounce"></i>
-                <span id="bannerWarningMessage">Attenzione: Il tuo abbonamento è in scadenza.</span>
+                <i id="bannerWarningIcon" class="fa-solid fa-bell text-lg"></i>
+                <span id="bannerWarningMessage">Il tuo abbonamento a CraftCRM è in prossimità di rinnovo.</span>
             </div>
             <div class="flex items-center gap-3">
-                <a id="bannerWAButton" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-lg text-xs flex items-center gap-1.5 transition shadow">
-                    <i class="fa-brands fa-whatsapp text-sm"></i> Rinnova Ora
+                <a id="bannerWAButton" href="https://wa.me/393293665778?text=Buongiorno!%20Vorrei%20informazioni%20per%20il%20rinnovo%20dell%27abbonamento%20CraftCRM" target="_blank" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1 rounded-lg text-xs flex items-center gap-1.5 transition shadow">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Rinnova il Servizio
                 </a>
                 <button onclick="dismissSubscriptionBanner()" class="text-white/80 hover:text-white p-1 rounded-md" title="Chiudi avviso (continua ad usare l'app)">
                     <i class="fa-solid fa-xmark text-base"></i>
@@ -62,26 +62,26 @@
         </div>
     </div>
 
-    <!-- KILL-SWITCH OVERLAY (ATTIVO SOLO DAL 7° GIORNO POST-SCADENZA) -->
-    <div id="killSwitchOverlay" class="hidden fixed inset-0 z-50 bg-red-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center text-white">
-        <div class="bg-red-900/80 border-2 border-red-500 rounded-3xl p-8 max-w-lg w-full shadow-2xl">
-            <div class="w-20 h-20 bg-red-600/30 border-2 border-red-400 rounded-full flex items-center justify-center mx-auto mb-6 text-red-300 text-4xl animate-pulse">
-                <i class="fa-solid fa-lock"></i>
+    <!-- SCHERMATA SOSPENSIONE TEMPORANEA (SOLO DAL 7° GIORNO POST-SCADENZA) -->
+    <div id="killSwitchOverlay" class="hidden fixed inset-0 z-50 bg-gray-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center text-white">
+        <div class="bg-gray-900/90 border border-gray-700 rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+            <div class="w-20 h-20 bg-amber-500/20 border border-amber-500/40 rounded-full flex items-center justify-center mx-auto mb-6 text-amber-400 text-4xl">
+                <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
-            <h2 class="text-3xl font-bold mb-3 tracking-tight">Abbonamento Disattivato</h2>
-            <p class="text-red-100 text-sm mb-6 leading-relaxed">
-                Il periodo di grazia (6 giorni) per il salone <strong id="killSwitchSalonName" class="underline">Salone Demo</strong> è terminato. L'accesso operativo è sospeso.
+            <h2 class="text-2xl font-bold mb-3 tracking-tight">Servizio Temporaneamente Sospeso</h2>
+            <p class="text-gray-300 text-sm mb-6 leading-relaxed">
+                Speriamo che il gestionale ti sia stato utile! Il periodo di cortesia per il salone <strong id="killSwitchSalonName" class="text-white underline">Salone Demo</strong> è terminato.
             </p>
-            <div class="bg-red-950/60 p-4 rounded-xl border border-red-800 text-left text-xs mb-6 space-y-1 text-red-200">
-                <p><strong>ID Cliente SaaS:</strong> <span id="killSwitchClientId">SALONE-DEMO-2026</span></p>
-                <p><strong>Stato Licenza:</strong> SOSPESA PER MANCATO RINNOVO</p>
-                <p><strong>Cancellazione Dati:</strong> <span id="killSwitchDaysLeft" class="font-bold text-yellow-300">Tra X giorni</span> (30 giorni totali dalla data di scadenza)</p>
+            <div class="bg-gray-950/80 p-4 rounded-xl border border-gray-800 text-left text-xs mb-6 space-y-1.5 text-gray-300">
+                <p><strong>Salone:</strong> <span id="killSwitchClientId">SALONE-DEMO</span></p>
+                <p><strong>Stato Licenza:</strong> In attesa di rinnovo</p>
+                <p><strong>Conservazione Dati Cloud:</strong> <span id="killSwitchDaysLeft" class="font-bold text-amber-400">Ancora per alcuni giorni</span> (30 giorni totali dalla scadenza)</p>
             </div>
-            <a id="killSwitchWA" href="https://wa.me/393000000000?text=Buongiorno%20vorrei%20rinnovare%20la%20licenza%20CraftCRM" target="_blank" 
+            <a id="killSwitchWA" href="https://wa.me/393293665778?text=Buongiorno!%20Ti%20contatto%20per%20l%27abbonamento%20CraftCRM.%20Vorrei%20informazioni%20per%20il%20rinnovo%20o%20per%20l%27esportazione%20dei%20dati." target="_blank" 
                class="w-full inline-flex items-center justify-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-3.5 rounded-xl transition shadow-lg text-base">
-                <i class="fa-brands fa-whatsapp text-xl"></i> Contatta Assistenza per Rinnovo
+                <i class="fa-brands fa-whatsapp text-xl"></i> Contatta il Supporto WhatsApp
             </a>
-            <button onclick="checkSubscriptionStatus(true)" class="mt-4 text-xs text-red-300 underline hover:text-white">Ricontrolla Stato Licenza</button>
+            <button onclick="checkSubscriptionStatus(true)" class="mt-4 text-xs text-gray-400 underline hover:text-white">Ricontrolla Stato Licenza</button>
         </div>
     </div>
 
@@ -139,7 +139,6 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
                             <span id="headerSalonTitle">Il Mio Salone</span>
                             <span class="text-gray-300 dark:text-gray-600">•</span>
-                            <!-- BADGE DINAMICO DI STATO LICENZA (VERDE, ARANCIONE CON T-4 GG, ROSSO CON T+6 GG) -->
                             <span id="headerLicenseBadge" class="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
                                 <i id="headerLicenseIcon" class="fa-solid fa-circle-check text-[10px]"></i>
                                 <span id="headerLicenseText">Licenza Attiva</span>
@@ -238,7 +237,6 @@
                 </div>
 
                 <div class="flex items-center gap-3 flex-wrap">
-                    <!-- TOGGLE SOVRAPPOSIZIONI SU AGENDA -->
                     <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs">
                         <span class="text-gray-600 dark:text-gray-400 font-medium">Sovrapposizioni:</span>
                         <select id="overlapModeSelect" onchange="toggleOverlapSetting(this.value)" class="bg-transparent font-bold text-brand-600 dark:text-brand-400 focus:outline-none cursor-pointer">
@@ -521,7 +519,6 @@
                     </div>
                 </div>
 
-                <!-- SELEZIONE ORARI RAPIDI PREIMPOSTATI (DINAMICI CON CONTROLLO DISPONIBILITÀ) -->
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="block font-semibold text-gray-700 dark:text-gray-300 text-xs">Orari Prefissati Disponibili</label>
@@ -679,7 +676,7 @@
             photoUrl: "",
             maxDailyAppts: 8,
             allowOverlaps: true,
-            supportPhone: "393000000000",
+            supportPhone: "393293665778",
             reminderText: "Ciao {name}, ti ricordiamo il tuo appuntamento per {service} il giorno {date} alle ore {time} presso il nostro Salone. Ti aspettiamo!",
             winbackText: "Ciao {name}! Ci manchi al salone. Per il tuo prossimo appuntamento abbiamo riservato uno sconto speciale del 20%! Prenota ora direttamente da questo messaggio. A presto!"
         };
@@ -691,7 +688,7 @@
             const parsedMax = Number(billingData?.maxDailyAppts);
             const maxDailyAppts = parsedMax >= 0 ? parsedMax : 8;
             const allowOverlaps = billingData?.allowOverlaps !== undefined ? Boolean(billingData.allowOverlaps) : true;
-            const supportPhone = (billingData && billingData.supportPhone) ? String(billingData.supportPhone) : "393000000000";
+            const supportPhone = "393293665778";
             const reminderText = (billingData && billingData.reminderText)
                 ? String(billingData.reminderText)
                 : "Ciao {name}, ti ricordiamo il tuo appuntamento per {service} il giorno {date} alle ore {time} presso il nostro Salone. Ti aspettiamo!";
@@ -729,16 +726,14 @@
 
             const waBtn = document.getElementById('killSwitchWA');
             if (waBtn) {
-                const cleanPhone = supportPhone.replace(/[^0-9]/g, '') || "393000000000";
-                const renewMsg = `Buongiorno, vorrei rinnovare la licenza per ${brandName}`;
-                waBtn.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(renewMsg)}`;
+                const renewMsg = `Buongiorno! Ti contatto per l'abbonamento CraftCRM del salone ${brandName}. Vorrei informazioni per il rinnovo o per richiedere l'esportazione dei dati. Grazie!`;
+                waBtn.href = `https://wa.me/393293665778?text=${encodeURIComponent(renewMsg)}`;
             }
 
             const bannerWABtn = document.getElementById('bannerWAButton');
             if (bannerWABtn) {
-                const cleanPhone = supportPhone.replace(/[^0-9]/g, '') || "393000000000";
-                const renewMsg = `Buongiorno, vorrei rinnovare la licenza per ${brandName}`;
-                bannerWABtn.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(renewMsg)}`;
+                const renewMsg = `Buongiorno! Vorrei rinnovare l'abbonamento a CraftCRM per il salone ${brandName}. Mi invieresti i dettagli? Grazie!`;
+                bannerWABtn.href = `https://wa.me/393293665778?text=${encodeURIComponent(renewMsg)}`;
             }
 
             if (typeof window.renderAllViews === 'function') {
@@ -760,7 +755,7 @@
             currentUserUid = null;
         }
 
-        // LOGICA DI VALUTAZIONE ABBONAMENTO & GRAZIA TEMPORALE (T-4 GG PRE-SCADENZA, T+6 GG GRAZIA, T+30 GG CANCELLAZIONE)
+        // LOGICA DI VALUTAZIONE ABBONAMENTO & GESTIONE CORTESE (T-4 GG PRE-SCADENZA, T+6 GG PERIODO CORTESIA, T+30 GG CANCELLAZIONE)
         function evaluateSubscriptionDoc(billingData, user) {
             applySalonConfigFromBilling(billingData, user);
 
@@ -792,8 +787,8 @@
 
             if (!billingData) {
                 if (billingStatusEl) {
-                    billingStatusEl.innerText = "Abbonamento non attivo";
-                    billingStatusEl.className = "font-bold text-red-600 dark:text-red-400";
+                    billingStatusEl.innerText = "In attesa di attivazione";
+                    billingStatusEl.className = "font-bold text-amber-600 dark:text-amber-400";
                 }
                 if (billingExpiresEl) billingExpiresEl.innerText = "-";
                 if (overlay) overlay.classList.remove('hidden');
@@ -810,12 +805,12 @@
 
             if (!isActiveFlag || !expStr) {
                 if (billingStatusEl) {
-                    billingStatusEl.innerText = "Sospeso dal Gestore";
+                    billingStatusEl.innerText = "Abbonamento Sospeso";
                     billingStatusEl.className = "font-bold text-red-600 dark:text-red-400";
                 }
                 if (overlay) overlay.classList.remove('hidden');
                 if (warningBanner) warningBanner.classList.add('hidden');
-                return { allowed: false, reason: "Abbonamento disattivato manualmente" };
+                return { allowed: false, reason: "Abbonamento disattivato" };
             }
 
             const expDate = new Date(expStr + "T00:00:00");
@@ -841,18 +836,18 @@
             if (diffDaysPassed >= -4 && diffDaysPassed <= 0) {
                 const daysToExpiration = Math.abs(diffDaysPassed);
                 if (headerBadgeEl) headerBadgeEl.className = "text-amber-500 font-semibold flex items-center gap-1";
-                if (headerIconEl) headerIconEl.className = "fa-solid fa-triangle-exclamation text-xs text-amber-500 animate-pulse";
-                if (headerTextEl) headerTextEl.innerText = `In Scadenza (${daysToExpiration === 0 ? 'Oggi' : 'tra ' + daysToExpiration + ' gg'})`;
+                if (headerIconEl) headerIconEl.className = "fa-solid fa-bell text-xs text-amber-500 animate-pulse";
+                if (headerTextEl) headerTextEl.innerText = `Rinnovo in arrivo (${daysToExpiration === 0 ? 'Oggi' : 'tra ' + daysToExpiration + ' gg'})`;
 
                 if (billingStatusEl) {
-                    billingStatusEl.innerText = `In Scadenza (${daysToExpiration === 0 ? 'Oggi' : 'tra ' + daysToExpiration + ' gg'})`;
+                    billingStatusEl.innerText = `Rinnovo in arrivo (${daysToExpiration === 0 ? 'Oggi' : 'tra ' + daysToExpiration + ' gg'})`;
                     billingStatusEl.className = "font-bold text-amber-500";
                 }
 
                 if (warningBanner && !window.subscriptionBannerDismissed) {
                     warningBanner.className = "bg-amber-500 text-white px-4 py-2.5 shadow-md relative transition-all duration-300 z-40";
-                    if (bannerIcon) bannerIcon.className = "fa-solid fa-triangle-exclamation text-lg animate-bounce";
-                    if (bannerMsg) bannerMsg.innerHTML = `<strong>Avviso Scadenza:</strong> Il tuo abbonamento scade ${daysToExpiration === 0 ? 'oggi' : 'tra ' + daysToExpiration + ' giorni'}. Rinnova ora per evitare sospensioni.`;
+                    if (bannerIcon) bannerIcon.className = "fa-solid fa-bell text-lg animate-bounce";
+                    if (bannerMsg) bannerMsg.innerHTML = `<strong>Rinnovo in arrivo:</strong> Il tuo abbonamento scade ${daysToExpiration === 0 ? 'oggi' : 'tra ' + daysToExpiration + ' giorni'}. Per evitare interruzioni puoi confermare il rinnovo con un semplice click.`;
                     warningBanner.classList.remove('hidden');
                 }
 
@@ -860,48 +855,47 @@
                 return { allowed: true, reason: "In avviso pre-scadenza" };
             }
 
-            // SCENARIO 3: Periodo di Grazia Post-Scadenza (Primi 6 Giorni dopo la scadenza)
+            // SCENARIO 3: Periodo di Cortesia Post-Scadenza (Primi 6 Giorni dopo la scadenza - NESSUN BLOCCO)
             if (diffDaysPassed > 0 && diffDaysPassed <= 6) {
                 const daysLeftInGrace = 6 - diffDaysPassed;
-                const daysUntilDeletion = 30 - diffDaysPassed;
 
                 if (headerBadgeEl) headerBadgeEl.className = "text-red-500 font-bold flex items-center gap-1";
-                if (headerIconEl) headerIconEl.className = "fa-solid fa-circle-exclamation text-xs text-red-500 animate-ping";
-                if (headerTextEl) headerTextEl.innerText = `Scaduto (Grazia: ${daysLeftInGrace} gg)`;
+                if (headerIconEl) headerIconEl.className = "fa-solid fa-circle-exclamation text-xs text-red-500 animate-pulse";
+                if (headerTextEl) headerTextEl.innerText = `Abbonamento Scaduto - Periodo di Cortesia (${daysLeftInGrace} gg)`;
 
                 if (billingStatusEl) {
-                    billingStatusEl.innerText = `Scaduto (${diffDaysPassed} gg fa) - In Grazia`;
+                    billingStatusEl.innerText = `Scaduto - In Periodo di Cortesia`;
                     billingStatusEl.className = "font-bold text-red-500";
                 }
 
                 if (warningBanner && !window.subscriptionBannerDismissed) {
                     warningBanner.className = "bg-red-600 text-white px-4 py-2.5 shadow-md relative transition-all duration-300 z-40";
                     if (bannerIcon) bannerIcon.className = "fa-solid fa-circle-exclamation text-lg animate-bounce";
-                    if (bannerMsg) bannerMsg.innerHTML = `<strong>Abbonamento Scaduto!</strong> Sei nel periodo di grazia (${daysLeftInGrace} giorni rimasti). Rinnova ora! Tra ${daysUntilDeletion} giorni i dati saranno cancellati definitivamente.`;
+                    if (bannerMsg) bannerMsg.innerHTML = `<strong>Abbonamento Scaduto:</strong> Abbiamo attivato il <strong>Periodo di Cortesia</strong> per consentirti di continuare a lavorare. Puoi aggiornare la licenza in qualsiasi momento per mantenere attivo il tuo cloud.`;
                     warningBanner.classList.remove('hidden');
                 }
 
-                if (overlay) overlay.classList.add('hidden'); // L'utente continua ad usare l'app liberamente!
-                return { allowed: true, reason: "In periodo di grazia" };
+                if (overlay) overlay.classList.add('hidden');
+                return { allowed: true, reason: "In periodo di cortesia" };
             }
 
-            // SCENARIO 4: Blocco Operativo Kill-Switch (Dal 7° giorno post-scadenza in poi)
+            // SCENARIO 4: Sospensione Temporanea Operativa (Dal 7° giorno post-scadenza in poi)
             const daysUntilDeletion = Math.max(0, 30 - diffDaysPassed);
-            if (daysLeftEl) daysLeftEl.innerText = `Tra ${daysUntilDeletion} giorni`;
+            if (daysLeftEl) daysLeftEl.innerText = `Ancora per circa ${daysUntilDeletion} giorni`;
 
             if (headerBadgeEl) headerBadgeEl.className = "text-red-600 font-bold flex items-center gap-1";
-            if (headerIconEl) headerIconEl.className = "fa-solid fa-lock text-xs text-red-600";
-            if (headerTextEl) headerTextEl.innerText = "Abbonamento Sospeso";
+            if (headerIconEl) headerIconEl.className = "fa-solid fa-clock-rotate-left text-xs text-red-600";
+            if (headerTextEl) headerTextEl.innerText = "Servizio Temporaneamente Sospeso";
 
             if (billingStatusEl) {
-                billingStatusEl.innerText = "Sospeso (Periodo Grazia Terminato)";
+                billingStatusEl.innerText = "Sospeso (Periodo di cortesia terminato)";
                 billingStatusEl.className = "font-bold text-red-600";
             }
 
             if (warningBanner) warningBanner.classList.add('hidden');
-            if (overlay) overlay.classList.remove('hidden'); // BLOCCO TOTALE SCHERMO
+            if (overlay) overlay.classList.remove('hidden');
 
-            return { allowed: false, reason: "Sospeso dopo 6 giorni di grazia" };
+            return { allowed: false, reason: "Sospeso dopo periodo di cortesia" };
         }
 
         window.dismissSubscriptionBanner = function() {
@@ -1094,7 +1088,7 @@
                     window.updateSyncBadge(false, "Abbonamento Sospeso");
                     const settingsStatus = document.getElementById('settingsSyncStatus');
                     if (settingsStatus) {
-                        settingsStatus.innerText = "Bloccato: periodo di grazia scaduto";
+                        settingsStatus.innerText = "Sospeso: periodo di cortesia terminato";
                         settingsStatus.className = "font-bold text-red-600 dark:text-red-400";
                     }
                 }
@@ -2022,7 +2016,7 @@
             if (typeof window.verifyCloudSubscription === 'function') {
                 const active = await window.verifyCloudSubscription();
                 if (manualCheck) {
-                    alert(active ? "Verifica completata: Licenza d'uso operativamente ATTIVA." : "Licenza sospesa per periodo di grazia terminato.");
+                    alert(active ? "Verifica completata: Licenza d'uso operativamente ATTIVA." : "Licenza sospesa al termine del periodo di cortesia.");
                 }
                 return active;
             }
