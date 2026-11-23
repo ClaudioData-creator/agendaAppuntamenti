@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it" class="light">
 <head>
@@ -607,6 +606,7 @@
             collection,
             doc,
             getDoc,
+            getDocs,
             onSnapshot,
             setDoc,
             deleteDoc
@@ -839,6 +839,39 @@
                 const ref = doc(db, 'artifacts', appId, 'users', currentUserUid, 'appointments', appIdToDelete);
                 await deleteDoc(ref);
             } catch (e) { console.error("Error deleting appointment:", e); }
+        };
+
+        window.confirmResetAllData = async function() {
+            if (!window.confirm("ATTENZIONE! Vuoi cancellare DEFINITIVAMENTE tutti i dati (clienti e appuntamenti) sia da questo dispositivo che dal Cloud Firebase? Questa azione è IRREVERSIBILE.")) {
+                return;
+            }
+
+            try {
+                window.clientsData = [];
+                window.appointmentsData = [];
+
+                localStorage.removeItem('craft_clients_saas_' + activeStorageKeySuffix);
+                localStorage.removeItem('craft_appointments_saas_' + activeStorageKeySuffix);
+
+                if (currentUserUid) {
+                    const { clientsRef, appsRef } = getUserCollections(currentUserUid);
+
+                    const clientSnaps = await getDocs(clientsRef);
+                    const clientDeletes = clientSnaps.docs.map(d => deleteDoc(d.ref));
+                    await Promise.all(clientDeletes);
+
+                    const appSnaps = await getDocs(appsRef);
+                    const appDeletes = appSnaps.docs.map(d => deleteDoc(d.ref));
+                    await Promise.all(appDeletes);
+                }
+
+                renderAllViews();
+                alert("Reset completato con successo! Tutti i dati sono stati cancellati definitivamente anche dal Cloud.");
+
+            } catch (err) {
+                console.error("Errore durante il reset dei dati:", err);
+                alert("Si è verificato un errore durante la cancellazione dei dati dal Cloud.");
+            }
         };
 
         onAuthStateChanged(auth, async (user) => {
@@ -1756,16 +1789,6 @@
                 }
             };
             reader.readAsText(file);
-        }
-
-        function confirmResetAllData() {
-            if (window.confirm("ATTENZIONE! Vuoi cancellare definitivamente tutti i dati locali del salone? Questa azione è irreversibile.")) {
-                localStorage.removeItem('craft_clients_saas');
-                localStorage.removeItem('craft_appointments_saas');
-                initializeDefaultData();
-                renderAllViews();
-                alert("Dati resettati allo stato iniziale.");
-            }
         }
 
         window.renderAllViews = function() {
