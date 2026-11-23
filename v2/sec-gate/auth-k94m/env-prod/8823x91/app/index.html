@@ -236,15 +236,6 @@
                     <input type="date" id="agendaCustomDate" onchange="setAgendaCustomDate(this.value)" class="px-2 py-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-xs text-gray-800 dark:text-gray-200">
                 </div>
 
-                <div class="flex items-center gap-3 flex-wrap">
-                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs">
-                        <span class="text-gray-600 dark:text-gray-400 font-medium">Sovrapposizioni:</span>
-                        <select id="overlapModeSelect" onchange="toggleOverlapSetting(this.value)" class="bg-transparent font-bold text-brand-600 dark:text-brand-400 focus:outline-none cursor-pointer">
-                            <option value="allow">Permesse (Multi-Poltrona)</option>
-                            <option value="block">Bloccate (Monoperatore)</option>
-                        </select>
-                    </div>
-
                     <select id="agendaStatusSelect" onchange="renderAgenda()" class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-medium text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-brand-500">
                         <option value="all">Tutti gli stati</option>
                         <option value="Confermato">Confermato</option>
