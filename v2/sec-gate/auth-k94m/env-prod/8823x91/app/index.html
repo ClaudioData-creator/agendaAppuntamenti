@@ -110,7 +110,7 @@
                 
                 <!-- Logo & License -->
                 <div class="flex items-center space-x-3">
-                    <div id="headerLogoBox" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white font-bold text-xl shadow-md overflow-hidden">
+                    <div id="headerLogoBox" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white font-bold text-xl shadow-md overflow-hidden shrink-0">
                         <i class="fa-solid fa-scissors"></i>
                     </div>
                     <div>
@@ -215,7 +215,16 @@
                     <input type="date" id="agendaCustomDate" onchange="setAgendaCustomDate(this.value)" class="px-2 py-1 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-xs text-gray-800 dark:text-gray-200">
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 flex-wrap">
+                    <!-- TOGGLE SOVRAPPOSIZIONI SU AGENDA -->
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 text-xs">
+                        <span class="text-gray-600 dark:text-gray-400 font-medium">Sovrapposizioni:</span>
+                        <select id="overlapModeSelect" onchange="toggleOverlapSetting(this.value)" class="bg-transparent font-bold text-brand-600 dark:text-brand-400 focus:outline-none">
+                            <option value="allow">Permesse (Multi-Poltrona)</option>
+                            <option value="block">Bloccate (Monoperatore)</option>
+                        </select>
+                    </div>
+
                     <select id="agendaStatusSelect" onchange="renderAgenda()" class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-medium text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-brand-500">
                         <option value="all">Tutti gli stati</option>
                         <option value="Confermato">Confermato</option>
@@ -485,8 +494,35 @@
                     </div>
                     <div>
                         <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1">Ora *</label>
-                        <input type="time" id="appTimeInput" required
+                        <input type="time" id="appTimeInput" step="900" required
                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200">
+                    </div>
+                </div>
+
+                <!-- SELEZIONE ORARI RAPIDI PREIMPOSTATI -->
+                <div>
+                    <label class="block font-semibold text-gray-700 dark:text-gray-300 mb-1 text-xs">Orario Rapido Prefissato</label>
+                    <div class="grid grid-cols-6 gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-xl border border-gray-200 dark:border-gray-700 max-h-24 overflow-y-auto custom-scrollbar">
+                        <button type="button" onclick="setQuickTime('08:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">08:00</button>
+                        <button type="button" onclick="setQuickTime('08:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">08:30</button>
+                        <button type="button" onclick="setQuickTime('09:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">09:00</button>
+                        <button type="button" onclick="setQuickTime('09:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">09:30</button>
+                        <button type="button" onclick="setQuickTime('10:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">10:00</button>
+                        <button type="button" onclick="setQuickTime('10:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">10:30</button>
+                        <button type="button" onclick="setQuickTime('11:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">11:00</button>
+                        <button type="button" onclick="setQuickTime('11:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">11:30</button>
+                        <button type="button" onclick="setQuickTime('12:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">12:00</button>
+                        <button type="button" onclick="setQuickTime('14:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">14:30</button>
+                        <button type="button" onclick="setQuickTime('15:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">15:00</button>
+                        <button type="button" onclick="setQuickTime('15:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">15:30</button>
+                        <button type="button" onclick="setQuickTime('16:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">16:00</button>
+                        <button type="button" onclick="setQuickTime('16:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">16:30</button>
+                        <button type="button" onclick="setQuickTime('17:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">17:00</button>
+                        <button type="button" onclick="setQuickTime('17:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">17:30</button>
+                        <button type="button" onclick="setQuickTime('18:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">18:00</button>
+                        <button type="button" onclick="setQuickTime('18:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">18:30</button>
+                        <button type="button" onclick="setQuickTime('19:00')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">19:00</button>
+                        <button type="button" onclick="setQuickTime('19:30')" class="py-1 px-1.5 bg-white dark:bg-gray-800 hover:bg-brand-500 hover:text-white rounded-lg text-[11px] font-semibold border border-gray-200 dark:border-gray-700 transition">19:30</button>
                     </div>
                 </div>
 
@@ -634,7 +670,9 @@
         window.salonConfig = {
             brandName: "Il Mio Salone",
             logoUrl: "",
+            photoUrl: "",
             maxDailyAppts: 8,
+            allowOverlaps: true,
             supportPhone: "393000000000",
             reminderText: "Ciao {name}, ti ricordiamo il tuo appuntamento per {service} il giorno {date} alle ore {time} presso il nostro Salone. Ti aspettiamo!",
             winbackText: "Ciao {name}! Ci manchi al salone. Per il tuo prossimo appuntamento abbiamo riservato uno sconto speciale del 20%! Prenota ora direttamente da questo messaggio. A presto!"
@@ -643,8 +681,10 @@
         function applySalonConfigFromBilling(billingData, user) {
             const brandName = (billingData && billingData.salonName) ? String(billingData.salonName) : (user?.email || "Il Mio Salone");
             const logoUrl = (billingData && billingData.logoUrl) ? String(billingData.logoUrl).trim() : "";
+            const photoUrl = (billingData && billingData.photoUrl) ? String(billingData.photoUrl).trim() : "";
             const parsedMax = Number(billingData?.maxDailyAppts);
-            const maxDailyAppts = parsedMax > 0 ? parsedMax : 8;
+            const maxDailyAppts = parsedMax >= 0 ? parsedMax : 8;
+            const allowOverlaps = billingData?.allowOverlaps !== undefined ? Boolean(billingData.allowOverlaps) : true;
             const supportPhone = (billingData && billingData.supportPhone) ? String(billingData.supportPhone) : "393000000000";
             const reminderText = (billingData && billingData.reminderText)
                 ? String(billingData.reminderText)
@@ -656,19 +696,27 @@
             window.salonConfig = {
                 brandName,
                 logoUrl,
+                photoUrl,
                 maxDailyAppts,
+                allowOverlaps,
                 supportPhone,
                 reminderText,
                 winbackText
             };
 
+            const overlapSelect = document.getElementById('overlapModeSelect');
+            if (overlapSelect) {
+                overlapSelect.value = allowOverlaps ? 'allow' : 'block';
+            }
+
             const logoBox = document.getElementById('headerLogoBox');
             if (logoBox) {
-                if (logoUrl) {
-                    logoBox.className = "w-10 h-10 rounded-xl overflow-hidden bg-white dark:bg-gray-700 flex items-center justify-center shadow-md border border-gray-200 dark:border-gray-600";
-                    logoBox.innerHTML = `<img src="${logoUrl}" alt="${brandName}" class="w-full h-full object-cover">`;
+                const imgToUse = photoUrl || logoUrl;
+                if (imgToUse) {
+                    logoBox.className = "w-10 h-10 rounded-xl overflow-hidden bg-white dark:bg-gray-700 flex items-center justify-center shadow-md border border-gray-200 dark:border-gray-600 shrink-0";
+                    logoBox.innerHTML = `<img src="${imgToUse}" alt="" class="w-full h-full object-cover block" onerror="this.parentElement.className='w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white font-bold text-xl shadow-md overflow-hidden shrink-0'; this.parentElement.innerHTML='<i class=\\'fa-solid fa-scissors\\'></i>';">`;
                 } else {
-                    logoBox.className = "w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white font-bold text-xl shadow-md overflow-hidden";
+                    logoBox.className = "w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-accent-600 flex items-center justify-center text-white font-bold text-xl shadow-md overflow-hidden shrink-0";
                     logoBox.innerHTML = `<i class="fa-solid fa-scissors"></i>`;
                 }
             }
@@ -987,6 +1035,16 @@
         let currentTheme = localStorage.getItem('craft_theme') || 'light';
         let currentCalDate = new Date();
 
+        function setQuickTime(timeStr) {
+            const timeInput = document.getElementById('appTimeInput');
+            if (timeInput) timeInput.value = timeStr;
+        }
+
+        function toggleOverlapSetting(val) {
+            if (!window.salonConfig) window.salonConfig = {};
+            window.salonConfig.allowOverlaps = (val === 'allow');
+        }
+
         function initializeDefaultData() {
             window.clientsData = [];
             window.appointmentsData = [];
@@ -1150,7 +1208,7 @@
                 grid.innerHTML += `<div class="p-2"></div>`;
             }
 
-            const MAX_DAILY_APPTS = window.salonConfig?.maxDailyAppts || 8;
+            const MAX_DAILY_APPTS = window.salonConfig?.maxDailyAppts !== undefined ? window.salonConfig.maxDailyAppts : 8;
             const todayIso = new Date().toISOString().split('T')[0];
 
             for (let day = 1; day <= lastDay.getDate(); day++) {
@@ -1161,12 +1219,18 @@
 
                 let colorClass = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-200';
 
-                if (count >= MAX_DAILY_APPTS) {
-                    colorClass = 'bg-red-600 text-white font-bold border-red-700 shadow-xs hover:bg-red-700';
-                } else if (count >= Math.ceil(MAX_DAILY_APPTS * 0.75)) {
-                    colorClass = 'bg-orange-500 text-white font-bold border-orange-600 hover:bg-orange-600';
-                } else if (count >= Math.ceil(MAX_DAILY_APPTS * 0.5)) {
-                    colorClass = 'bg-amber-100 text-amber-900 font-semibold border-amber-300 dark:bg-amber-950/80 dark:text-amber-200 hover:bg-amber-200';
+                if (MAX_DAILY_APPTS > 0) {
+                    if (count >= MAX_DAILY_APPTS) {
+                        colorClass = 'bg-red-600 text-white font-bold border-red-700 shadow-xs hover:bg-red-700';
+                    } else if (count >= Math.ceil(MAX_DAILY_APPTS * 0.75)) {
+                        colorClass = 'bg-orange-500 text-white font-bold border-orange-600 hover:bg-orange-600';
+                    } else if (count >= Math.ceil(MAX_DAILY_APPTS * 0.5)) {
+                        colorClass = 'bg-amber-100 text-amber-900 font-semibold border-amber-300 dark:bg-amber-950/80 dark:text-amber-200 hover:bg-amber-200';
+                    }
+                } else {
+                    colorClass = count > 0 
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-300 hover:bg-emerald-200'
+                        : 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-100';
                 }
 
                 const isToday = (dateStr === todayIso);
@@ -1671,7 +1735,27 @@
             const id = document.getElementById('appIdInput').value || 'app_' + Date.now();
             const clientName = document.getElementById('appClientInput').value.trim();
             const phone = document.getElementById('appPhoneInput').value.trim();
-            
+            const selectedDate = document.getElementById('appDateInput').value;
+            const selectedTime = document.getElementById('appTimeInput').value;
+
+            // =========================================================
+            // CONTROLLO SOVRAPPOSIZIONE ORARIO (Se il salone ha bloccato le sovrapposizioni)
+            // =========================================================
+            const allowOverlaps = window.salonConfig?.allowOverlaps !== false; 
+
+            if (!allowOverlaps) {
+                const isOverlap = (window.appointmentsData || []).some(app => {
+                    if (app.id === id) return false;
+                    if (app.status === 'Annullato') return false;
+                    return app.date === selectedDate && app.time === selectedTime;
+                });
+
+                if (isOverlap) {
+                    alert(`⚠️ Attenzione! L'orario delle ${selectedTime} del giorno ${selectedDate} risulta già occupato da un altro appuntamento e le sovrapposizioni sono bloccate.`);
+                    return;
+                }
+            }
+
             let client = window.clientsData.find(c => c.name.toLowerCase() === clientName.toLowerCase());
             if (!client) {
                 client = {
@@ -1691,8 +1775,8 @@
                 clientName: clientName,
                 phone: phone,
                 service: document.getElementById('appServiceInput').value,
-                date: document.getElementById('appDateInput').value,
-                time: document.getElementById('appTimeInput').value,
+                date: selectedDate,
+                time: selectedTime,
                 price: parseFloat(document.getElementById('appPriceInput').value) || 0,
                 status: document.getElementById('appStatusInput').value,
                 notes: document.getElementById('appNotesInput').value
